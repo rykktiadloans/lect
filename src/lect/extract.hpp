@@ -28,7 +28,8 @@ namespace lect {
  * @param add Function that adds an annotation to a container
  */
 template <typename F>
-void extract_text_annotations_inner(const std::filesystem::path &path, F &add) {
+void extract_text_annotations_inner(const std::filesystem::path &path,
+                                    F &add) noexcept(false) {
     using namespace std::filesystem;
     if (is_directory(path)) {
         for (auto const &child : directory_iterator{path}) {
@@ -36,6 +37,12 @@ void extract_text_annotations_inner(const std::filesystem::path &path, F &add) {
                 std::cout << std::this_thread::get_id() << "\n";
                 extract_text_annotations_inner(child, add);
             });
+            try {
+                fut.get();
+            }
+            catch (Exception e){
+                throw e;
+            }
         }
     }
     if (path.extension() != ".an") {
@@ -50,18 +57,34 @@ void extract_text_annotations_inner(const std::filesystem::path &path, F &add) {
     std::string content;
     std::string current_line;
     std::vector<std::string> references;
+    int line_counter = 1;
 
     while (std::getline(file, current_line)) {
+        if (first &&
+            current_line.find_first_not_of("\n ") == std::string::npos) {
+            line_counter++;
+            continue;
+        }
         if (first) {
             first = false;
             if (current_line.at(0) == '#' && current_line.at(1) == ' ') {
                 title = current_line.substr(2);
             } else {
-                // todo: figure out how to deal with mistakes
-                return;
+                std::cout << path.string() + ":" +
+                                 std::to_string(line_counter) +
+                                 " - the file doesn't follow the text "
+                                 "annotation format.\n"
+                                 "First line of the file should be `#` "
+                                 "followed by the "
+                                 "annotations title.\n"
+                                 "Example: `# Elaborate annotation "
+                                 "title`\n";
+                throw Exception(path.string() + " doesn't have a proper title");
             }
+            line_counter++;
             continue;
         }
+        line_counter++;
         content += current_line;
         content += '\n';
     }
@@ -81,19 +104,20 @@ void extract_text_annotations_inner(const std::filesystem::path &path, F &add) {
 }
 
 /**
- * @brief Extracts all the text annotations from a directory. Returns
- * std::nullopt if it's a file
+ * @brief Finds all the text annotations in a directory and returns them.
+ * Throws an exception if the path isn't a directory
  *
- * @param root Root directory
- * @return Vector of all text annotations if root is a directory, null otherwise
+ * @param root Root directory of the annotations
+ * @throw lect:Exception
+ * @return Vector of all text annotations it could find in a directory
  */
-std::optional<std::vector<lect::TextAnnotation>>
-extract_text_annotations(const std::filesystem::path &root) {
+std::vector<TextAnnotation>
+extract_text_annotations(const std::filesystem::path &root) noexcept(false) {
     using namespace std::filesystem;
     std::vector<TextAnnotation> annotations;
 
     if (!is_directory(root)) {
-        return std::nullopt;
+        throw Exception(root.string() + " is not a directory.");
     }
 
     std::mutex mutex;

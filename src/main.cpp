@@ -1,16 +1,21 @@
 #include <iostream>
+#include <vector>
 
+#include "annotations.hpp"
 #include "extract.hpp"
 
 int main() {
-    auto text_annotations = lect::extract_text_annotations("/home/rykktiadloans/Coding/lect/annotations/");
-    if(text_annotations.has_value()) {
-        for(auto i : text_annotations.value()) {
-            std::cout << i.id << " " << i.title << " " << i.references.size() << "\n";
-        }
+    std::vector<lect::TextAnnotation> text_annotations;
+    try {
+        text_annotations = lect::extract_text_annotations(
+            "/home/rykktiadloans/Coding/lect/annotations");
+
+    } catch (lect::Exception) {
+
     }
-    else {
-        std::cout << "No value?\n";
+    for (auto i : text_annotations) {
+        std::cout << i.id << " " << i.title << " " << i.references.size()
+                  << "\n";
     }
     return 0;
 }
