@@ -43,6 +43,10 @@ target_include_directories(tree-sitter
     ${TREE_SITTER_CPP}/bindings/c
 )
 
+# JSON
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
 target_compile_options(tree-sitter-cpp PRIVATE ${STRICT_COMPILE_COMMANDS})
 
 ## Library configuration
@@ -50,7 +54,7 @@ add_library(lect_lib STATIC
     ${SRC_DIR}/lect/extract.hpp
 )
 
-target_link_libraries(lect_lib PUBLIC tree-sitter tree-sitter-cpp)
+target_link_libraries(lect_lib PUBLIC tree-sitter tree-sitter-cpp nlohmann_json::nlohmann_json)
 set_target_properties(lect_lib PROPERTIES LINKER_LANGUAGE CXX)
 
 target_include_directories(lect_lib PUBLIC
