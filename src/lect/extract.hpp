@@ -6,16 +6,20 @@
 
 #pragma once
 
-#include "annotations.hpp"
+#include "structures.hpp"
+#include "tree_sitter/api.h"
+#include <algorithm>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <future>
 #include <iostream>
 #include <mutex>
-#include <optional>
 #include <string>
 #include <thread>
+#include <tree-sitter-cpp.h>
 #include <vector>
+
 namespace lect {
 
 /**
@@ -26,6 +30,7 @@ namespace lect {
  * @tparam F Function type
  * @param path Path to the file
  * @param add Function that adds an annotation to a container
+ * @throw lect::Exception
  */
 template <typename F>
 void extract_text_annotations_inner(const std::filesystem::path &path,
@@ -39,10 +44,10 @@ void extract_text_annotations_inner(const std::filesystem::path &path,
             });
             try {
                 fut.get();
-            }
-            catch (Exception e){
+            } catch (Exception const &e) {
                 throw e;
             }
+            return;
         }
     }
     if (path.extension() != ".an") {
@@ -130,6 +135,127 @@ extract_text_annotations(const std::filesystem::path &root) noexcept(false) {
 
     extract_text_annotations_inner(root, add);
 
-    return {annotations};
+    return annotations;
 }
+
+//$example Please work
+template <typename F>
+void extract_code_annotations_inner(const std::filesystem::path &path,
+                                    const Language &language, F &add) {
+    using namespace std::filesystem;
+    if (is_directory(path)) {
+        for (auto const &child : directory_iterator{path}) {
+            std::future fut =
+                std::async(std::launch::async, [&child, &add, &language] {
+                    std::cout << std::this_thread::get_id() << "\n";
+                    extract_code_annotations_inner(child, language, add);
+                });
+        }
+        return;
+    }
+    if (std::find(language.extensions.begin(), language.extensions.end(),
+                  path.extension()) == language.extensions.end()) {
+        return;
+    }
+
+    std::ifstream file(path);
+    std::stringstream file_stream;
+    file_stream << file.rdbuf();
+    std::string file_contents(file_stream.str());
+
+    TSParser *parser = ts_parser_new();
+    ts_parser_set_language(parser, language.language);
+    TSTree *tree = ts_parser_parse_string(
+        parser, nullptr, file_contents.c_str(), file_contents.size());
+
+    uint32_t error_offset;
+    TSQueryError query_error;
+    TSQuery *query =
+        ts_query_new(language.language, language.query.c_str(),
+                     language.query.size(), &error_offset, &query_error);
+
+    if (query_error != 0) {
+        std::cout << "Issue with query at " << error_offset << " of kind "
+                  << query_error << "\n";
+        return;
+    }
+
+    TSQueryCursor *cursor = ts_query_cursor_new();
+    ts_query_cursor_exec(cursor, query, ts_tree_root_node(tree));
+
+    TSQueryMatch match;
+    while (ts_query_cursor_next_match(cursor, &match)) {
+        int start_comment = ts_node_start_byte(match.captures[0].node);
+        int end_comment = ts_node_end_byte(match.captures[0].node);
+        std::string capture_comment =
+            file_contents.substr(start_comment, end_comment - start_comment);
+        if (!language.validate_comment(capture_comment)) {
+            continue;
+        }
+
+        int start_object = ts_node_start_byte(match.captures[1].node);
+        int end_object = ts_node_end_byte(match.captures[1].node);
+        std::string capture_object =
+            file_contents.substr(start_object, end_object - start_object);
+        if (!language.validate_object(capture_object)) {
+            continue;
+        }
+
+        uint64_t dollar = capture_comment.find_first_of("$");
+        uint64_t end_of_id = capture_comment.find_first_not_of(
+            "abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            dollar + 1);
+
+        if (end_of_id == std::string::npos) {
+            std::cout
+                << path.string() + ":" +
+                       std::to_string(
+                           ts_node_start_point(match.captures[0].node).row) +
+                       "- the source code annotation directive doesn't have an "
+                       "identity\n"
+                       "Example `//$identity Elaborate title`\n";
+            throw Exception(
+                path.string() + " line " +
+                std::to_string(
+                    ts_node_start_point(match.captures[0].node).row));
+        }
+        std::string id = capture_comment.substr(dollar + 1, end_of_id - dollar - 1);
+        std::string title = capture_comment.substr(end_of_id + 1);
+        if(title.find_first_not_of("\n ") == std::string::npos) {
+            std::cout
+                << path.string() + ":" +
+                       std::to_string(
+                           ts_node_start_point(match.captures[0].node).row) +
+                       "- the source code annotation directive doesn't have a "
+                       "title\n"
+                       "Example `//$identity Elaborate title`\n";
+            throw Exception(
+                path.string() + " line " +
+                std::to_string(
+                    ts_node_start_point(match.captures[0].node).row));
+        }
+
+        add(id, title, capture_object, path.string(), ts_node_start_point(match.captures[0].node).row);
+    }
+}
+
+std::vector<CodeAnnotation>
+extract_code_annotations(const std::filesystem::path &root,
+                         const Language &language) noexcept(false) {
+    using namespace std::filesystem;
+    std::vector<CodeAnnotation> annotations;
+
+    std::mutex mutex;
+    auto add = [&annotations, &mutex](std::string id, std::string title,
+                                      std::string content, std::string file,
+                                      int line) {
+        const std::lock_guard<std::mutex> lock_guard(mutex);
+        annotations.emplace_back(id, title, content, file, line);
+    };
+
+    extract_code_annotations_inner(root, language, add);
+
+    return annotations;
+}
+
 } // namespace lect

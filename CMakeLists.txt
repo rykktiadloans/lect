@@ -1,27 +1,65 @@
-cmake_minimum_required(VERSION 3.17.0)
+cmake_minimum_required(VERSION 3.30.0)
 
-project(lect CXX)
+project(lect LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(STRICT_COMPILE_COMMANDS -Wpedantic -Wall -Wextra -Wno-sign-conversion -Wno-unused-parameter -g)
+set(BUILD_SHARED_LIBS OFF)
 
-add_compile_options(${STRICT_COMPILE_COMMANDS})
+include(FetchContent)
 
 set(SRC_DIR src)
+set(TREE_SITTER_LIB lib/tree-sitter-0.24.7/lib)
+set(TREE_SITTER_CPP lib/tree-sitter-cpp)
 
-# Library configuration
+## Dependencies
+# Tree-sitter
+add_library(tree-sitter STATIC
+    ${TREE_SITTER_LIB}/src/lib.c
+)
+
+target_include_directories(tree-sitter 
+    PRIVATE
+    ${TREE_SITTER_LIB}/src
+    ${TREE_SITTER_LIB}/include
+    PUBLIC
+    ${TREE_SITTER_LIB}/include
+)
+
+target_compile_options(tree-sitter PRIVATE ${STRICT_COMPILE_COMMANDS})
+
+# C++ Grammar
+add_library(tree-sitter-cpp STATIC
+    ${TREE_SITTER_CPP}/src/parser.c
+    ${TREE_SITTER_CPP}/src/scanner.c
+)
+
+target_include_directories(tree-sitter 
+    PRIVATE
+    ${TREE_SITTER_CPP}/src/tree_sitter
+    ${TREE_SITTER_CPP}/bindings/c
+    PUBLIC
+    ${TREE_SITTER_CPP}/bindings/c
+)
+
+target_compile_options(tree-sitter-cpp PRIVATE ${STRICT_COMPILE_COMMANDS})
+
+## Library configuration
 add_library(lect_lib STATIC
     ${SRC_DIR}/lect/extract.hpp
 )
 
+target_link_libraries(lect_lib PUBLIC tree-sitter tree-sitter-cpp)
 set_target_properties(lect_lib PROPERTIES LINKER_LANGUAGE CXX)
 
 target_include_directories(lect_lib PUBLIC
     ${SRC_DIR}/lect
 )
 
+target_compile_options(lect_lib PRIVATE ${STRICT_COMPILE_COMMANDS})
 
-# Target configuration
+## Target configuration
 add_executable(lect ${SRC_DIR}/main.cpp)
 target_link_libraries(lect lect_lib)
+target_compile_options(lect PRIVATE ${STRICT_COMPILE_COMMANDS})
