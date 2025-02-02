@@ -47,8 +47,8 @@ void extract_text_annotations_inner(const std::filesystem::path &path,
             } catch (Exception const &e) {
                 throw e;
             }
-            return;
         }
+        return;
     }
     if (path.extension() != ".an") {
         return;
