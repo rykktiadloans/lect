@@ -6,12 +6,13 @@
 - Nlohmann's JSON library
 
 ## To-do List
-- [ ] Add JSON export
-- [ ] Add proper processing of command line arguments
-- [ ] Add optional checks
+- [ ] Figure out error checking
 - [ ] Add annotation tree displayer
 - [ ] Add annotation inspector
+- [ ] Add optional checks
 - [ ] Add Java support
+- [x] Add basic command line arguments
+- [x] Add JSON export
 - [x] Add source code annotations
 - [x] Add proper format checking to text annotations 
 

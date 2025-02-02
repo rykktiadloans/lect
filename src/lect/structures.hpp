@@ -9,8 +9,10 @@
 #include "tree-sitter-cpp.h"
 #include "tree_sitter/api.h"
 #include <cstdint>
+#include <filesystem>
 #include <functional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace lect {
@@ -92,12 +94,12 @@ class Exception : public std::exception {
  *
  */
 struct Language {
-    const std::string name;
-    const std::vector<std::string> extensions;
-    const std::string query;
+    std::string name;
+    std::vector<std::string> extensions;
+    std::string query;
     const TSLanguage *language;
-    const std::function<bool(std::string)> validate_comment;
-    const std::function<bool(std::string)> validate_object;
+    std::function<bool(std::string)> validate_comment;
+    std::function<bool(std::string)> validate_object;
 
     /**
      * @brief Generates an object suited for C++ parsing
@@ -123,7 +125,7 @@ struct Language {
                 ptr++;
             }
 
-            if(string.at(ptr) != '$') {
+            if (string.at(ptr) != '$') {
                 return false;
             }
 
@@ -146,21 +148,27 @@ struct Language {
 
         return Language("c++", extensions,
                         "((comment) @comment . (comment)* . (_) @object)",
-                        tree_sitter_cpp(),
-                        validate_comment, validate_object);
+                        tree_sitter_cpp(), validate_comment, validate_object);
     }
 
-  private:
+    static Language placeholder() {
+        return Language(
+            "", std::vector<std::string>(), "", nullptr,
+            [](std::string) { return false; },
+            [](std::string) { return false; });
+    }
+
     /**
-     * @brief The constructor for the language. Is private so that only
-     * supported languages can be created
-     *
+     * @brief The constructor for the language. 
+     * 
      * @param name Name of the language
      * @param extensions File extensions for the languages
      * @param query Query for the data
      * @param language Language object for parsing
-     * @param validate_comment Function to validate that a supplied string is an appropriate comment
-     * @param validate_object Function to validate that a supplied string isn't a comment
+     * @param validate_comment Function to validate that a supplied string is an
+     * appropriate comment
+     * @param validate_object Function to validate that a supplied string isn't
+     * a comment
      */
     Language(const std::string name, const std::vector<std::string> &extensions,
              const std::string query, const TSLanguage *language,
@@ -168,6 +176,71 @@ struct Language {
              std::function<bool(std::string)> validate_object)
         : name(name), extensions(extensions), query(query), language(language),
           validate_comment(validate_comment), validate_object(validate_object) {
+    }
+};
+
+struct Settings {
+    std::filesystem::path text_annotation_path;
+    std::filesystem::path code_annotation_path;
+    std::filesystem::path output_path{"out.json"};
+    Language language{Language::placeholder()};
+
+    Settings(int argc, char **argv) {
+        int ptr = 1;
+        bool text_path_set = false;
+        bool code_path_set = false;
+        bool output_path_set = false;
+        bool language_set = false;
+
+        while (ptr < argc) {
+            std::string arg = argv[ptr];
+            if (arg == "-t") {
+                std::string dir = argv[ptr + 1];
+                ptr++;
+                text_annotation_path = dir;
+                text_path_set = true;
+            } else if (arg == "-s") {
+                std::string path = argv[ptr + 1];
+                ptr++;
+                code_annotation_path = path;
+                code_path_set = true;
+            } else if (arg == "-o") {
+                std::string path = argv[ptr + 1];
+                ptr++;
+                output_path = path;
+                output_path_set = true;
+            } else if (arg == "-l") {
+                std::string lang = argv[ptr + 1];
+                ptr++;
+                std::unordered_map<std::string, std::function<Language(void)>>
+                    language_map{{"c++", Language::cpp}};
+                auto constructor = language_map.find(lang);
+                if(constructor == language_map.end()) {
+                    throw Exception("Unrecognized language: " + lang);
+                }
+                language = constructor->second();
+                language_set = true;
+            } else {
+                throw Exception("Unrecognized argument: " + arg);
+            }
+            ptr++;
+        }
+
+        if(!text_path_set) {
+            throw Exception("Text annotation path isn't set");
+        }
+        if(!code_path_set) {
+            throw Exception("Code annotation path isn't set");
+        }
+        if(!output_path_set) {
+            throw Exception("Output path isn't set");
+        }
+        if(!language_set) {
+            throw Exception("Language isn't set");
+        }
+
+        
+
     }
 };
 
