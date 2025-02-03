@@ -17,6 +17,46 @@
 namespace lect {
 
 /**
+ * @brief Reset the color of the standard output
+ */
+std::string color_reset = "\x1B[0m";
+
+/**
+ * @brief Color the standard output red
+ */
+std::string color_red = "\x1B[31m";
+
+/**
+ * @brief Color the standard output green
+ */
+std::string color_green = "\x1B[32m";
+
+/**
+ * @brief Color the standard output yellow
+ */
+std::string color_yellow = "\x1B[33m";
+
+/**
+ * @brief Color the standard output blue
+ */
+std::string color_blue = "\x1B[34m";
+
+/**
+ * @brief Color the standard output magenta
+ */
+std::string color_magenta = "\x1B[35m";
+
+/**
+ * @brief Color the standard output cyan
+ */
+std::string color_cyan = "\x1B[36m";
+
+/**
+ * @brief Color the standard output white
+ */
+std::string color_white = "\x1B[37m";
+
+/**
  * @class TextAnnotation
  * @brief A representation of a text annotation
  *
@@ -158,8 +198,8 @@ struct Language {
     }
 
     /**
-     * @brief The constructor for the language. 
-     * 
+     * @brief The constructor for the language.
+     *
      * @param name Name of the language
      * @param extensions File extensions for the languages
      * @param query Query for the data
@@ -225,31 +265,31 @@ struct Settings {
                 std::unordered_map<std::string, std::function<Language(void)>>
                     language_map{{"c++", Language::cpp}};
                 auto constructor = language_map.find(lang);
-                if(constructor == language_map.end()) {
-                    throw Exception("Unrecognized language: " + lang);
+                if (constructor == language_map.end()) {
+                    throw Exception("Unrecognized language: " + color_blue +
+                                    lang + color_reset);
                 }
                 language = constructor->second();
                 language_set = true;
             } else {
-                throw Exception("Unrecognized argument: " + arg);
+                throw Exception("Unrecognized argument: " + color_blue + arg +
+                                color_reset);
             }
             ptr++;
         }
 
-        if(!text_path_set) {
+        if (!text_path_set) {
             throw Exception("Text annotation path isn't set");
         }
-        if(!code_path_set) {
+        if (!code_path_set) {
             throw Exception("Code annotation path isn't set");
         }
-        if(!output_path_set) {
+        if (!output_path_set) {
             throw Exception("Output path isn't set");
         }
-        if(!language_set) {
+        if (!language_set) {
             throw Exception("Language isn't set");
         }
-
     }
 };
-
 } // namespace lect

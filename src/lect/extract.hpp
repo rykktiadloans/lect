@@ -81,14 +81,16 @@ void extract_text_annotations_inner(const std::filesystem::path &path,
             if (current_line.at(0) == '#' && current_line.at(1) == ' ') {
                 title = current_line.substr(2);
             } else {
-                std::cout << canonical(path).string() + ":" +
-                                 std::to_string(line_counter) +
-                                 " - the file doesn't follow the text "
+                std::cout << color_red + "ERROR: " + color_reset + color_yellow
+                          << canonical(path).string() + color_reset + ":" +
+                                 color_blue + std::to_string(line_counter) +
+                                 color_reset +
+                                 "\n  The file doesn't follow the text "
                                  "annotation format.\n"
-                                 "First line of the file should be `#` "
+                                 "  First line of the file should be `#` "
                                  "followed by the "
                                  "annotations title.\n"
-                                 "Example: `# Elaborate annotation "
+                                 "  Example: `# Elaborate annotation "
                                  "title`\n";
                 throw Exception(path.string() + " doesn't have a proper title");
             }
@@ -171,7 +173,7 @@ void extract_code_annotations_inner(const std::filesystem::path &path,
                     extract_code_annotations_inner(child, language, add);
                 }));
         }
-        for(auto &fut : futures) {
+        for (auto &fut : futures) {
             try {
                 fut.get();
             } catch (Exception e) {
@@ -237,12 +239,16 @@ void extract_code_annotations_inner(const std::filesystem::path &path,
 
         if (end_of_id == std::string::npos) {
             std::cout
-                << canonical(path).string() + ":" +
+                << color_red + "ERROR: " + color_reset + color_yellow + canonical(path).string() + color_reset + ":" +
+                       color_blue +
                        std::to_string(
                            ts_node_start_point(match.captures[0].node).row) +
-                       " - the source code annotation directive doesn't have an "
+                       color_reset +
+                       "\n  The source code annotation directive doesn't "
+                       "have "
+                       "an "
                        "identity\n"
-                       "Example `//$identity Elaborate title`\n";
+                       "  Example `//$identity Elaborate title`\n";
             throw Exception(
                 path.string() + " line " +
                 std::to_string(
@@ -253,12 +259,14 @@ void extract_code_annotations_inner(const std::filesystem::path &path,
         std::string title = capture_comment.substr(end_of_id + 1);
         if (title.find_first_not_of("\n ") == std::string::npos) {
             std::cout
-                << canonical(path).string() + ":" +
+                << color_red + "ERROR: " + color_reset + color_yellow + canonical(path).string() + color_reset + ":" +
+                       color_blue +
                        std::to_string(
                            ts_node_start_point(match.captures[0].node).row) +
-                       " - the source code annotation directive doesn't have a "
+                       color_reset +
+                       "\n  The source code annotation directive doesn't have a "
                        "title\n"
-                       "Example `//$identity Elaborate title`\n";
+                       "  Example `//$identity Elaborate title`\n";
             throw Exception(
                 path.string() + " line " +
                 std::to_string(
