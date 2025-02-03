@@ -13,6 +13,9 @@ int main(int argc, char **argv) {
         settings = std::make_unique<lect::Settings>(argc, argv);
     }
     catch (lect::Exception e) {
+        if(std::string(e.what()) == "help") {
+            return 0;
+        }
         std::cout << lect::color_red + "ERROR: " + lect::color_reset + e.what() << "\n";
         return 1;
     }

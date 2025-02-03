@@ -6,12 +6,12 @@
 - Nlohmann's JSON library
 
 ## To-do List
-- [ ] Add -h
 - [ ] Add basic output checking
 - [ ] Add annotation tree displayer
 - [ ] Add annotation inspector
 - [ ] Add optional checks
 - [ ] Add Java support
+- [x] Add -h
 - [x] Add colored output
 - [x] Figure out error checking
 - [x] Add basic command line arguments

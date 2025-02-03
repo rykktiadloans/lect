@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <functional>
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -271,6 +272,22 @@ struct Settings {
                 }
                 language = constructor->second();
                 language_set = true;
+            } else if (arg == "-h" || arg == "--help") {
+                std::cout << "Usage:\n"
+                             "  lect -t <text_ann_dir> -s <src_dir> -l "
+                             "<language> -o <output>"
+                             "  [<optional_args>...]\n\n"
+                             "Required arguments:\n"
+                             "  -t          Directory with .an annotation files\n"
+                             "  -s          Source code directory with annotations\n"
+                             "  -l          Programming language of the project\n"
+                             "  -o          Output directory\n\n"
+                             "Supported languages:\n"
+                             "  c++         C++ (.cpp .c .h .hpp)\n\n"
+                             "Optional arguments:\n"
+                             "  -h, --help  Help screen\n" ;
+                throw Exception("help");
+
             } else {
                 throw Exception("Unrecognized argument: " + color_blue + arg +
                                 color_reset);
