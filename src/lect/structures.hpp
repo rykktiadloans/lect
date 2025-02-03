@@ -1,7 +1,6 @@
 /**
  * @file
- * @brief A collection of data structures used to represent an annotation, as
- * well as a custom exception
+ * @brief A collection of data structures used in other parts of the application
  */
 
 #pragma once
@@ -179,12 +178,23 @@ struct Language {
     }
 };
 
+/**
+ * @class Settings
+ * @brief A class that parser the CLI arguments and makes an object out of it.
+ *
+ */
 struct Settings {
     std::filesystem::path text_annotation_path;
     std::filesystem::path code_annotation_path;
-    std::filesystem::path output_path{"out.json"};
+    std::filesystem::path output_path;
     Language language{Language::placeholder()};
 
+    /**
+     * @brief Uses main() function's argc and argv arguments to construct itself
+     *
+     * @param argc Number of command line arguments
+     * @param argv An array of command line arguments
+     */
     Settings(int argc, char **argv) {
         int ptr = 1;
         bool text_path_set = false;
@@ -238,8 +248,6 @@ struct Settings {
         if(!language_set) {
             throw Exception("Language isn't set");
         }
-
-        
 
     }
 };

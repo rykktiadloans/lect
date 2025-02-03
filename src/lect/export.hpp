@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @brief A collection of functions used to output the documentation
+ */
+
 #pragma once
 
 #include "nlohmann/json.hpp"
@@ -7,8 +12,16 @@
 
 namespace lect {
 
+/**
+ * @brief A function that takes in the text and code annotations and makes a
+ * JSON document out of them
+ *
+ * @param text_annotations A vector of text annotations
+ * @param code_annotations A vector of code annotations
+ * @return
+ */
 nlohmann::json
-annotations_to_json(const std::vector<TextAnnotation> text_annotations,
+annotations_to_json(const std::vector<TextAnnotation> &text_annotations,
                     const std::vector<CodeAnnotation> &code_annotations) {
     using namespace nlohmann;
 

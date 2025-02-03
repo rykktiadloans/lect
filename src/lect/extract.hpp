@@ -9,11 +9,13 @@
 #include "structures.hpp"
 #include "tree_sitter/api.h"
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <future>
 #include <iostream>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -37,18 +39,22 @@ void extract_text_annotations_inner(const std::filesystem::path &path,
                                     F &add) noexcept(false) {
     using namespace std::filesystem;
     if (is_directory(path)) {
-        for (auto const &child : directory_iterator{path}) {
-            std::future fut = std::async(std::launch::async, [&child, &add] {
+        std::vector<std::future<void>> futures;
+        for (const std::filesystem::path &child : directory_iterator{path}) {
+            futures.push_back(std::async(std::launch::async, [child, &add] {
                 std::cout << std::this_thread::get_id() << "\n";
                 extract_text_annotations_inner(child, add);
-            });
+            }));
+        }
+        for (auto &fut : futures) {
             try {
                 fut.get();
-            } catch (Exception const &e) {
-                throw e;
+            } catch (Exception e) {
+                if (true) {
+                    throw e;
+                }
             }
         }
-        return;
     }
     if (path.extension() != ".an") {
         return;
@@ -75,7 +81,7 @@ void extract_text_annotations_inner(const std::filesystem::path &path,
             if (current_line.at(0) == '#' && current_line.at(1) == ' ') {
                 title = current_line.substr(2);
             } else {
-                std::cout << path.string() + ":" +
+                std::cout << canonical(path).string() + ":" +
                                  std::to_string(line_counter) +
                                  " - the file doesn't follow the text "
                                  "annotation format.\n"
@@ -102,10 +108,12 @@ void extract_text_annotations_inner(const std::filesystem::path &path,
         std::size_t end_pos = content.find_first_not_of(
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-",
             next_pos + 1);
-        references.push_back(content.substr(next_pos, end_pos - next_pos));
+        references.push_back(
+            content.substr(next_pos + 1, end_pos - next_pos - 1));
         next_pos = content.find('$', end_pos);
     }
     add(id, title, content, references);
+    return;
 }
 
 /**
@@ -139,17 +147,38 @@ extract_text_annotations(const std::filesystem::path &root) noexcept(false) {
 }
 
 //$example Please work
+/**
+ * @brief An inner function that extracts code annotations from a file, or looks
+ * for other files in the directory
+ *
+ * @tparam F function type for adding a code annotation to an array
+ * @param path Path of the current file
+ * @param language Language object
+ * @param add Function that adds a code annotation to an array
+ * @throw lect::Exception
+ */
 template <typename F>
 void extract_code_annotations_inner(const std::filesystem::path &path,
-                                    const Language &language, F &add) {
+                                    const Language &language,
+                                    F &add) noexcept(false) {
     using namespace std::filesystem;
     if (is_directory(path)) {
+        std::vector<std::future<void>> futures;
         for (auto const &child : directory_iterator{path}) {
-            std::future fut =
-                std::async(std::launch::async, [&child, &add, &language] {
+            futures.push_back(
+                std::async(std::launch::async, [child, &add, &language] {
                     std::cout << std::this_thread::get_id() << "\n";
                     extract_code_annotations_inner(child, language, add);
-                });
+                }));
+        }
+        for(auto &fut : futures) {
+            try {
+                fut.get();
+            } catch (Exception e) {
+                if (true) {
+                    throw e;
+                }
+            }
         }
         return;
     }
@@ -208,10 +237,10 @@ void extract_code_annotations_inner(const std::filesystem::path &path,
 
         if (end_of_id == std::string::npos) {
             std::cout
-                << path.string() + ":" +
+                << canonical(path).string() + ":" +
                        std::to_string(
                            ts_node_start_point(match.captures[0].node).row) +
-                       "- the source code annotation directive doesn't have an "
+                       " - the source code annotation directive doesn't have an "
                        "identity\n"
                        "Example `//$identity Elaborate title`\n";
             throw Exception(
@@ -219,14 +248,15 @@ void extract_code_annotations_inner(const std::filesystem::path &path,
                 std::to_string(
                     ts_node_start_point(match.captures[0].node).row));
         }
-        std::string id = capture_comment.substr(dollar + 1, end_of_id - dollar - 1);
+        std::string id =
+            capture_comment.substr(dollar + 1, end_of_id - dollar - 1);
         std::string title = capture_comment.substr(end_of_id + 1);
-        if(title.find_first_not_of("\n ") == std::string::npos) {
+        if (title.find_first_not_of("\n ") == std::string::npos) {
             std::cout
-                << path.string() + ":" +
+                << canonical(path).string() + ":" +
                        std::to_string(
                            ts_node_start_point(match.captures[0].node).row) +
-                       "- the source code annotation directive doesn't have a "
+                       " - the source code annotation directive doesn't have a "
                        "title\n"
                        "Example `//$identity Elaborate title`\n";
             throw Exception(
@@ -235,10 +265,19 @@ void extract_code_annotations_inner(const std::filesystem::path &path,
                     ts_node_start_point(match.captures[0].node).row));
         }
 
-        add(id, title, capture_object, path.string(), ts_node_start_point(match.captures[0].node).row);
+        add(id, title, capture_object, relative(path).string(),
+            ts_node_start_point(match.captures[0].node).row);
     }
 }
 
+/**
+ * @brief A function that extracts all code annotations from the file/directory
+ *
+ * @param root Path in which to look for annotations
+ * @param language Language object
+ * @return A vector of code annotations
+ * @throw lect::Exception
+ */
 std::vector<CodeAnnotation>
 extract_code_annotations(const std::filesystem::path &root,
                          const Language &language) noexcept(false) {
