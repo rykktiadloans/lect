@@ -19,6 +19,7 @@ int main(int argc, char **argv) {
         std::cout << lect::color_red + "ERROR: " + lect::color_reset + e.what() << "\n";
         return 1;
     }
+
     std::vector<lect::TextAnnotation> text_annotations;
     try {
         text_annotations =
