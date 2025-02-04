@@ -7,11 +7,11 @@ Lect is a program that allows the user to document design patterns by using mult
 - [Nlohmann's JSON library](https://github.com/nlohmann/json): used for serializing annotations into an easily-readable format.
 
 ## To-do List
-- [ ] Add basic output checking
 - [ ] Add annotation tree displayer
 - [ ] Add annotation inspector
 - [ ] Add optional checks
 - [ ] Add Java support
+- [x] Add basic output checking
 - [x] Add -h
 - [x] Add colored output
 - [x] Figure out error checking

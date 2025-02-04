@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -71,6 +72,8 @@ struct TextAnnotation {
     TextAnnotation(std::string id, std::string title, std::string content,
                    std::vector<std::string> references)
         : id(id), title(title), content(content), references(references) {}
+
+    TextAnnotation() {}
 };
 
 /**
@@ -273,19 +276,20 @@ struct Settings {
                 language = constructor->second();
                 language_set = true;
             } else if (arg == "-h" || arg == "--help") {
-                std::cout << "Usage:\n"
-                             "  lect -t <text_ann_dir> -s <src_dir> -l "
-                             "<language> -o <output>"
-                             "  [<optional_args>...]\n\n"
-                             "Required arguments:\n"
-                             "  -t          Directory with .an annotation files\n"
-                             "  -s          Source code directory with annotations\n"
-                             "  -l          Programming language of the project\n"
-                             "  -o          Output directory\n\n"
-                             "Supported languages:\n"
-                             "  c++         C++ (.cpp .c .h .hpp)\n\n"
-                             "Optional arguments:\n"
-                             "  -h, --help  Help screen\n" ;
+                std::cout
+                    << "Usage:\n"
+                       "  lect -t <text_ann_dir> -s <src_dir> -l "
+                       "<language> -o <output>"
+                       "  [<optional_args>...]\n\n"
+                       "Required arguments:\n"
+                       "  -t          Directory with .an annotation files\n"
+                       "  -s          Source code directory with annotations\n"
+                       "  -l          Programming language of the project\n"
+                       "  -o          Output directory\n\n"
+                       "Supported languages:\n"
+                       "  c++         C++ (.cpp .c .h .hpp)\n\n"
+                       "Optional arguments:\n"
+                       "  -h, --help  Help screen\n";
                 throw Exception("help");
 
             } else {
@@ -309,4 +313,63 @@ struct Settings {
         }
     }
 };
+
+/**
+ * @class Checker
+ * @brief An base class that implements a handler that checks the
+ * text and code annotations for any problems
+ *
+ */
+struct Checker {
+
+    /**
+     * @brief Check text and code annotations for any errors
+     *
+     * @param text_annotations Vector of text annotations
+     * @param code_annotations Vector of code annotations
+     * @throw lect::Exception
+     */
+    virtual void
+    check(std::vector<TextAnnotation> &text_annotations,
+          std::vector<CodeAnnotation> &code_annotations) noexcept(false) = 0;
+
+    /**
+     * @brief A virtual destructor for subclassing
+     */
+    virtual ~Checker(){};
+
+    /**
+     * @brief A function that adds a new checker to the end of the chain
+     *
+     * @tparam T Type of the checker
+     */
+    template <typename T> void add() {
+        if (m_next.get() == nullptr) {
+            m_next = std::make_unique<T>();
+            return;
+        }
+        m_next->add<T>();
+    }
+
+    /**
+     * @brief Call the next checker in the sequence, if there is any
+     *
+     * @param text_annotations Vector of text annotations to use on the next
+     * check call
+     * @param code_annotations Vector of code annotations to use on the next
+     * check call
+     * @throw lect::Exception
+     */
+    void next(std::vector<TextAnnotation> &text_annotations,
+              std::vector<CodeAnnotation> &code_annotations) noexcept(false) {
+        if (m_next.get() == nullptr) {
+            return;
+        }
+        m_next->check(text_annotations, code_annotations);
+    }
+
+  private:
+    std::unique_ptr<Checker> m_next = nullptr;
+};
+
 } // namespace lect

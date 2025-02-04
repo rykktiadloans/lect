@@ -148,7 +148,7 @@ extract_text_annotations(const std::filesystem::path &root) noexcept(false) {
     return annotations;
 }
 
-//$example Please work
+//$extract Please work
 /**
  * @brief An inner function that extracts code annotations from a file, or looks
  * for other files in the directory

@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "checks.hpp"
 #include "export.hpp"
 #include "extract.hpp"
 #include "structures.hpp"
@@ -38,6 +39,17 @@ int main(int argc, char **argv) {
         if (true) {
             return 1;
         }
+    }
+
+    lect::IdAllowedSymbolsChecker checker;
+    checker.add<lect::DuplicateChecker>();
+    checker.add<lect::CycleChecker>();
+    try {
+        checker.check(text_annotations, code_annotations);
+    }
+    catch (lect::Exception e) {
+        std::cout << lect::color_red + "ERROR: " + lect::color_reset + e.what() << "\n";
+        return 1;
     }
 
     auto dict = lect::annotations_to_json(text_annotations, code_annotations);

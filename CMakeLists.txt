@@ -52,6 +52,8 @@ target_compile_options(tree-sitter-cpp PRIVATE ${STRICT_COMPILE_COMMANDS})
 ## Library configuration
 add_library(lect_lib STATIC
     ${SRC_DIR}/lect/extract.hpp
+    ${SRC_DIR}/lect/export.hpp
+    ${SRC_DIR}/lect/structures.hpp
 )
 
 target_link_libraries(lect_lib PUBLIC tree-sitter tree-sitter-cpp nlohmann_json::nlohmann_json)
