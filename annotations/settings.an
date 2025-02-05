@@ -1,0 +1,7 @@
+# Settings
+
+Settings class at $settings-src is a class that contains all the options that configure the program.
+
+It analyzes command line arguments to get paths to annotations, used language, output path, and others. If some argument isn't recognised, an exception is thrown.
+
+It also builds a Checker $checker chain based on certain command line arguments (TO-DO)

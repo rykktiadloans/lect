@@ -126,6 +126,7 @@ void extract_text_annotations_inner(const std::filesystem::path &path,
  * @throw lect:Exception
  * @return Vector of all text annotations it could find in a directory
  */
+//$extract-text-src Extraction of text annotations
 std::vector<TextAnnotation>
 extract_text_annotations(const std::filesystem::path &root) noexcept(false) {
     using namespace std::filesystem;
@@ -148,7 +149,6 @@ extract_text_annotations(const std::filesystem::path &root) noexcept(false) {
     return annotations;
 }
 
-//$extract Please work
 /**
  * @brief An inner function that extracts code annotations from a file, or looks
  * for other files in the directory
@@ -286,6 +286,7 @@ void extract_code_annotations_inner(const std::filesystem::path &path,
  * @return A vector of code annotations
  * @throw lect::Exception
  */
+//$extract-code-src Extraction of code annotations
 std::vector<CodeAnnotation>
 extract_code_annotations(const std::filesystem::path &root,
                          const Language &language) noexcept(false) {

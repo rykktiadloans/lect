@@ -132,6 +132,7 @@ class Exception : public std::exception {
  * source code annotations
  *
  */
+//$language-src Language
 struct Language {
     std::string name;
     std::vector<std::string> extensions;

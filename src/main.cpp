@@ -9,6 +9,7 @@
 #include "settings.hpp"
 #include "structures.hpp"
 
+//$main-src Main function
 int main(int argc, char **argv) {
     std::unique_ptr<lect::Settings> settings;
     try {

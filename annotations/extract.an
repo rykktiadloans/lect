@@ -1,0 +1,9 @@
+# Extraction functions
+
+Code and text annotations are extracted separately
+
+Code annotations are extracted using extract_code_annotations() function at $extract-code-src. It uses a Language object $language for all language specific information. It looks recursively looks for all files with extensions used by a language, queries all potential code annotations, and filters out those that aren't. If there are any errors with their syntax, it will throw an exception.
+
+Text annotations are extracted using extract_text_annotations() function at $extract-text-src. It recursively looks through all the files in the directory and turns them into text annotations. If the originally supplied file is not a directory, it will throw an exception. It also throws one if an annotation is malformed.
+
+Both of these functions are asynchronous.

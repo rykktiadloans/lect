@@ -20,6 +20,7 @@ namespace lect {
  * @param code_annotations A vector of code annotations
  * @return
  */
+//$json-src JSON export
 nlohmann::json
 annotations_to_json(const std::vector<TextAnnotation> &text_annotations,
                     const std::vector<CodeAnnotation> &code_annotations) {

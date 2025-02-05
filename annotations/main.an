@@ -1,0 +1,11 @@
+# Main function
+
+Function main() at $main-src is the entry-point of the application.
+
+When the program is run, it analyzes it creates a Settings object $settings based on the CLI arguments it received, or notifies the user if there are any errors.
+
+After that, it extract text and then code annotations using $extract. If there are any errors, the user is notified.
+
+Then, they are checked against the Checker chain $checkers to see if there are any errors in them.
+
+If everything is alright, they are exported to the output JSON file using $export.

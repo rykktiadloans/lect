@@ -1,0 +1,3 @@
+# JSON export
+
+Function annotations_to_json() at $json-src translates text and code annotations into a single JSON object that can later be injected into a JS script in the documentation.

@@ -1,22 +1,31 @@
+/**
+ * @file settings.hpp
+ * @brief Settings is a class that parser the CLI arguments to configure the
+ * program
+ */
+
 #pragma once
+
+#include "checks.hpp"
+#include "structures.hpp"
+#include <filesystem>
+#include <iostream>
+#include <memory>
+namespace lect {
 
 /**
  * @class Settings
  * @brief A class that parser the CLI arguments and makes an object out of it.
  *
- */
-#include "checks.hpp"
-#include "structures.hpp"
-#include <filesystem>
-#include <memory>
-namespace lect {
-
+ */ 
+//$settings-src Settings class
 struct Settings {
     std::filesystem::path text_annotation_path;
     std::filesystem::path code_annotation_path;
     std::filesystem::path output_path;
     Language language{Language::placeholder()};
-    std::unique_ptr<Checker> checker{std::make_unique<IdAllowedSymbolsChecker>()};
+    std::unique_ptr<Checker> checker{
+        std::make_unique<IdAllowedSymbolsChecker>()};
 
     /**
      * @brief Uses main() function's argc and argv arguments to construct itself

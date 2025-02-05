@@ -1,3 +1,8 @@
+/**
+ * @file checks.hpp
+ * @brief A collection of classes that can analyze and check the annotations for errors
+ */
+
 #pragma once
 
 #include "structures.hpp"
@@ -17,6 +22,7 @@ namespace lect {
  * text and code annotations for any problems
  *
  */
+//$checker-src Checker classes
 struct Checker {
 
     /**
