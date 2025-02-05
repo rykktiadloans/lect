@@ -3,12 +3,71 @@
 #include "structures.hpp"
 #include <algorithm>
 #include <cstdint>
-#include <iterator>
+#include <memory>
+#include <optional>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 namespace lect {
 
+/**
+ * @class Checker
+ * @brief An base class that implements a handler that checks the
+ * text and code annotations for any problems
+ *
+ */
+struct Checker {
+
+    /**
+     * @brief Check text and code annotations for any errors
+     *
+     * @param text_annotations Vector of text annotations
+     * @param code_annotations Vector of code annotations
+     * @throw lect::Exception
+     */
+    virtual void
+    check(std::vector<TextAnnotation> &text_annotations,
+          std::vector<CodeAnnotation> &code_annotations) noexcept(false) = 0;
+
+    /**
+     * @brief A virtual destructor for subclassing
+     */
+    virtual ~Checker(){};
+
+    /**
+     * @brief A function that adds a new checker to the end of the chain
+     *
+     * @tparam T Type of the checker
+     */
+    template <typename T> void add() {
+        if (!m_next.has_value()) {
+            m_next = std::make_unique<T>();
+            return;
+        }
+        m_next->get()->add<T>();
+    }
+
+    /**
+     * @brief Call the next checker in the sequence, if there is any
+     *
+     * @param text_annotations Vector of text annotations to use on the next
+     * check call
+     * @param code_annotations Vector of code annotations to use on the next
+     * check call
+     * @throw lect::Exception
+     */
+    void next(std::vector<TextAnnotation> &text_annotations,
+              std::vector<CodeAnnotation> &code_annotations) noexcept(false) {
+        if (!m_next.has_value()) {
+            return;
+        }
+        m_next->get()->check(text_annotations, code_annotations);
+    }
+
+  private:
+    std::optional<std::unique_ptr<Checker>> m_next = std::nullopt;
+};
 /**
  * @class CycleChecker
  * @brief A Checker that checks whether there are any cycles of annotation
@@ -182,4 +241,45 @@ struct IdAllowedSymbolsChecker : public Checker {
         next(text_annotations, code_annotations);
     }
 };
+
+/**
+ * @class DuplicateChecker
+ * @brief Checks whether all annotations have unique IDs (no duplicates)
+ *
+ */
+struct DuplicateChecker : public Checker {
+    /**
+     * @brief A destructor
+     */
+    virtual ~DuplicateChecker() override{};
+
+    /**
+     * @brief A function that checks whether all annotations have unique IDs
+     *
+     * @param text_annotations Text Annotations to check
+     * @param code_annotations Code annotations to check
+     */
+    virtual void check(std::vector<TextAnnotation> &text_annotations,
+                       std::vector<CodeAnnotation>
+                           &code_annotations) noexcept(false) override {
+        std::set<std::string> id_set;
+
+        for (const auto &annotation : text_annotations) {
+            if (id_set.find(annotation.id) != id_set.end()) {
+                throw Exception("There are at least 2 annotations with ID " +
+                                annotation.id);
+            }
+            id_set.insert(annotation.id);
+        }
+
+        for (const auto &annotation : code_annotations) {
+            if (id_set.find(annotation.id) != id_set.end()) {
+                throw Exception("There are at least 2 annotations with ID " +
+                                annotation.id);
+            }
+            id_set.insert(annotation.id);
+        }
+    }
+};
+
 } // namespace lect

@@ -6,6 +6,7 @@
 #include "checks.hpp"
 #include "export.hpp"
 #include "extract.hpp"
+#include "settings.hpp"
 #include "structures.hpp"
 
 int main(int argc, char **argv) {
@@ -41,11 +42,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    lect::IdAllowedSymbolsChecker checker;
-    checker.add<lect::NonexistentChecker>();
-    checker.add<lect::CycleChecker>();
     try {
-        checker.check(text_annotations, code_annotations);
+        settings->checker->check(text_annotations, code_annotations);
     }
     catch (lect::Exception e) {
         std::cout << lect::color_red + "ERROR: " + lect::color_reset + e.what() << "\n";
