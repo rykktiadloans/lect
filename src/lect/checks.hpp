@@ -98,18 +98,19 @@ struct CycleChecker : public Checker {
 };
 
 /**
- * @class DuplicateChecker
- * @brief Check for any duplicate annotations
+ * @class NonexistentChecker
+ * @brief Check for any annotations that reference nonexistent annotations
  *
  */
-struct DuplicateChecker : public Checker {
+struct NonexistentChecker : public Checker {
     /**
      * @brief A destructor
      */
-    virtual ~DuplicateChecker() override{};
+    virtual ~NonexistentChecker() override{};
 
     /**
-     * @brief A function that checks for any duplicate annotations
+     * @brief A function that checks for any annotations that reference
+     * nonexistent annotations
      *
      * @param text_annotations Text annotations to check
      * @param code_annotations Code annotations to check
@@ -152,7 +153,8 @@ struct IdAllowedSymbolsChecker : public Checker {
     virtual ~IdAllowedSymbolsChecker() override{};
 
     /**
-     * @brief A function that checks whether all annotation IDs contain only allowed characters
+     * @brief A function that checks whether all annotation IDs contain only
+     * allowed characters
      *
      * @param text_annotations Text annotations to check
      * @param code_annotations Code annotations to check

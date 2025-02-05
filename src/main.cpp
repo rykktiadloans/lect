@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
     }
 
     lect::IdAllowedSymbolsChecker checker;
-    checker.add<lect::DuplicateChecker>();
+    checker.add<lect::NonexistentChecker>();
     checker.add<lect::CycleChecker>();
     try {
         checker.check(text_annotations, code_annotations);
