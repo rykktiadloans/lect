@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lect</title>
+    <script type="text/javascript" src="vis-network.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #network {
+            position: relative;
+        }
+
+        #network,
+        #viewer {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #viewer {
+            position: absolute;
+            box-sizing: border-box;
+            display: none;
+            justify-content: center;
+            background: rgb(0 0 0 / 80%);
+            z-index: 5;
+            padding-top: 100px;
+        }
+
+        #viewer>div {
+            position: relative;
+            box-sizing: border-box;
+            background-color: white;
+            width: 800px;
+            height: calc(100% - 100px);
+            border-radius: 20px;
+            padding: 20px;
+            overflow: scroll;
+        }
+
+        #viewer .content {
+            border-radius: 10px;
+            padding: 5px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .close {
+            position: absolute;
+            color: white;
+            background-color: rgb(38, 38, 38);
+            padding: 10px;
+            border-radius: 10px;
+            right: 20px;
+            cursor: pointer;
+
+        }
+    </style>
+</head>
+
+<body>
+    <div id="viewer">
+        <div>
+            <div class="close">Close</div>
+            <h4></h4>
+            <h1></h1>
+            <div class="content"></div>
+        </div>
+    </div>
+    <div id="network"> </div>
+    <script type="text/javascript" src="script.js"></script>
+</body>
+
+</html>
