@@ -13,6 +13,23 @@ set(SRC_DIR src)
 set(TREE_SITTER_LIB lib/tree-sitter-0.24.7/lib)
 set(TREE_SITTER_CPP lib/tree-sitter-cpp)
 
+## Comptime file reads
+set(RESOURCES)
+function(add_res_file STR_NAME FILE_NAME)
+    file(READ res/${FILE_NAME} FILE_CONTENT)
+    configure_file(res/filestringtemp.hpp ${CMAKE_CURRENT_SOURCE_DIR}/${SRC_DIR}/resread/${STR_NAME}.hpp)
+    set(RESOURCES ${RESOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/${SRC_DIR}/resread/${STR_NAME}.hpp PARENT_SCOPE)
+endfunction()
+
+add_res_file(index_html index.html)
+add_res_file(script_js script.js)
+add_res_file(vis_js vis-network.min.js)
+
+add_library(resources STATIC ${RESOURCES})
+target_include_directories(resources PUBLIC ${SRC_DIR}/resread)
+set_target_properties(resources PROPERTIES LINKER_LANGUAGE CXX)
+target_compile_options(resources PRIVATE ${STRICT_COMPILE_COMMANDS})
+
 ## Dependencies
 # Tree-sitter
 add_library(tree-sitter STATIC
@@ -58,7 +75,7 @@ add_library(lect_lib STATIC
     ${SRC_DIR}/lect/settings.hpp
 )
 
-target_link_libraries(lect_lib PUBLIC tree-sitter tree-sitter-cpp nlohmann_json::nlohmann_json)
+target_link_libraries(lect_lib PUBLIC tree-sitter tree-sitter-cpp nlohmann_json::nlohmann_json resources)
 set_target_properties(lect_lib PROPERTIES LINKER_LANGUAGE CXX)
 
 target_include_directories(lect_lib PUBLIC
@@ -68,6 +85,7 @@ target_include_directories(lect_lib PUBLIC
 target_compile_options(lect_lib PRIVATE ${STRICT_COMPILE_COMMANDS})
 
 ## Target configuration
+# Final executable
 add_executable(lect ${SRC_DIR}/main.cpp)
-target_link_libraries(lect lect_lib)
+target_link_libraries(lect lect_lib )
 target_compile_options(lect PRIVATE ${STRICT_COMPILE_COMMANDS})

@@ -8,6 +8,7 @@
 #include "structures.hpp"
 #include <algorithm>
 #include <cstdint>
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <set>
@@ -198,7 +199,7 @@ struct NonexistentChecker : public Checker {
             for (const auto &ref : an.references) {
                 auto it = std::find(ids.begin(), ids.end(), ref);
                 if (it == ids.end()) {
-                    throw Exception("Annotation `" + ref + "` doesn't exist");
+                    throw Exception("Annotation `" + ref + "` in text annotation `" + an.id + "` doesn't exist");
                 }
             }
         }
@@ -285,6 +286,7 @@ struct DuplicateChecker : public Checker {
             }
             id_set.insert(annotation.id);
         }
+        next(text_annotations, code_annotations);
     }
 };
 

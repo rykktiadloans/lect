@@ -6,6 +6,6 @@ When the program is run, it analyzes it creates a Settings object $settings base
 
 After that, it extract text and then code annotations using $extract. If there are any errors, the user is notified.
 
-Then, they are checked against the Checker chain $checkers to see if there are any errors in them.
+Then, they are checked against the Checker chain $checker to see if there are any errors in them.
 
-If everything is alright, they are exported to the output JSON file using $export.
+If everything is alright, they are turned into a JSON object and are used to generate final documentation using $export

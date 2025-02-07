@@ -17,7 +17,7 @@ namespace lect {
  * @class Settings
  * @brief A class that parser the CLI arguments and makes an object out of it.
  *
- */ 
+ */
 //$settings-src Settings class
 struct Settings {
     std::filesystem::path text_annotation_path;
@@ -50,11 +50,28 @@ struct Settings {
                 std::string dir = argv[ptr + 1];
                 ptr++;
                 text_annotation_path = dir;
+                if (!std::filesystem::exists(text_annotation_path)) {
+                    throw Exception("Text annotation path `" +
+                                    text_annotation_path.string() +
+                                    "` doesn't exist");
+                }
+                if (!std::filesystem::is_directory(text_annotation_path)) {
+                    throw Exception(
+                        "Text annotation path `" +
+                        std::filesystem::canonical(text_annotation_path)
+                            .string() +
+                        "` must be a directory");
+                }
                 text_path_set = true;
             } else if (arg == "-s") {
                 std::string path = argv[ptr + 1];
                 ptr++;
                 code_annotation_path = path;
+                if (!std::filesystem::exists(code_annotation_path)) {
+                    throw Exception("Code annotation path `" +
+                                    code_annotation_path.string() +
+                                    "` doesn't exist");
+                }
                 code_path_set = true;
             } else if (arg == "-o") {
                 std::string path = argv[ptr + 1];
