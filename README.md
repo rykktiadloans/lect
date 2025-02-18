@@ -41,7 +41,7 @@ You can view the program's options using `-h` and `--help` CLI flags.
 ## Supported languages
 - C++: using `c++`
 
-## Dependencies
+## Dependencies used
 - [Tree-sitter](https://github.com/tree-sitter/tree-sitter): used for extracting source code annotations. Can support a wide range of languages, as long as there are parsers for them.
 - [Tree-sitter-cpp](https://github.com/tree-sitter/tree-sitter-cpp): a Tree-sitter parser for C++.
 - [Nlohmann's JSON library](https://github.com/nlohmann/json): used for serializing annotations into an easily-readable format.

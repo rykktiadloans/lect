@@ -9,6 +9,7 @@
 #include "tree_sitter/api.h"
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -90,6 +91,17 @@ struct CodeAnnotation {
 };
 
 /**
+ * @class Annotations
+ * @brief A class that encapsulates the annotations
+ *
+ */
+//$annotations-src Annotations class
+struct Annotations {
+    std::vector<TextAnnotation> text_annotations;
+    std::vector<CodeAnnotation> code_annotations;
+};
+
+/**
  * @class Exception
  * @brief Custom exception class for this application
  *
@@ -127,19 +139,104 @@ class Exception : public std::exception {
 };
 
 /**
+ * @class CaptureValidator
+ * @brief An abstract class that defines an interface for other validator
+ * objects, which can be used to validate comment and object captures
+ *
+ */
+//$capture-validator-src Capture validator interface
+struct CaptureValidator {
+    /**
+     * @brief Destructor
+     */
+    virtual ~CaptureValidator(){};
+    /**
+     * @brief Validate that a particular comment is a potential code annotation
+     *
+     * @param string Comment to validate
+     * @return true if it is correct, false otherwise
+     */
+    virtual bool validate_comment(std::string string) = 0;
+    /**
+     * @brief Validate that a particular object isn't a comment
+     *
+     * @param string object to validate
+     * @return true if it is correct, false otherwise
+     */
+    virtual bool validate_object(std::string string) = 0;
+};
+
+/**
+ * @class CSyntaxValidator
+ * @brief A class that can be used for validating in languages with C-style
+ * syntax
+ *
+ */
+struct CSyntaxValidator : public CaptureValidator {
+    /**
+     * @brief Make sure the comment is a one-line comment with a dollar after
+     * the token
+     *
+     * @param string Comment to validate
+     * @return true if it is correct, false otherwise
+     */
+    virtual bool validate_comment(std::string string) override {
+        uint64_t begin = string.find_first_not_of("\n ");
+        if (begin == std::string::npos) {
+            return false;
+        }
+
+        std::string comment_fragment = string.substr(begin, 2);
+        if (comment_fragment != "//") {
+            return false;
+        }
+
+        uint64_t ptr = begin + 2;
+        while (string.at(ptr) == ' ' || string.at(ptr) == '\n') {
+            ptr++;
+        }
+
+        if (string.at(ptr) != '$') {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @brief Make sure that an object isn't a comment
+     *
+     * @param string String to validate
+     * @return true if it is correct, false otherwise
+     */
+    virtual bool validate_object(std::string string) override {
+        uint64_t begin = string.find_first_not_of("\n ");
+        if (begin == std::string::npos) {
+            return false;
+        }
+
+        std::string comment_fragment = string.substr(begin, 2);
+        if (comment_fragment == "//" || comment_fragment == "/*") {
+            return false;
+        }
+
+        return true;
+    }
+};
+
+/**
  * @class Language
  * @brief A class that represents all the language-dependent data for extracting
  * source code annotations
  *
  */
-//$language-src Language
+//$language-src Language class
 struct Language {
     std::string name;
     std::vector<std::string> extensions;
     std::string query;
-    const TSLanguage *language;
-    std::function<bool(std::string)> validate_comment;
-    std::function<bool(std::string)> validate_object;
+    const TSLanguage *language{nullptr};
+    std::unique_ptr<CaptureValidator> validator{nullptr};
 
     /**
      * @brief Generates an object suited for C++ parsing
@@ -148,56 +245,23 @@ struct Language {
      */
     static Language cpp() {
         std::vector<std::string> extensions{".c", ".cpp", ".h", ".hpp"};
-
-        auto validate_comment = [](std::string string) {
-            uint64_t begin = string.find_first_not_of("\n ");
-            if (begin == std::string::npos) {
-                return false;
-            }
-
-            std::string comment_fragment = string.substr(begin, 2);
-            if (comment_fragment != "//") {
-                return false;
-            }
-
-            uint64_t ptr = begin + 2;
-            while (string.at(ptr) == ' ' || string.at(ptr) == '\n') {
-                ptr++;
-            }
-
-            if (string.at(ptr) != '$') {
-                return false;
-            }
-
-            return true;
-        };
-
-        auto validate_object = [](std::string string) {
-            uint64_t begin = string.find_first_not_of("\n ");
-            if (begin == std::string::npos) {
-                return false;
-            }
-
-            std::string comment_fragment = string.substr(begin, 2);
-            if (comment_fragment == "//" || comment_fragment == "/*") {
-                return false;
-            }
-
-            return true;
-        };
-
         return Language("c++", extensions,
                         "((comment) @comment . (comment)* . (_) @object)",
-                        tree_sitter_cpp(), validate_comment, validate_object);
+                        tree_sitter_cpp(),
+                        std::make_unique<CSyntaxValidator>());
     }
 
+    /**
+     * @brief Get a placeholder language object
+     *
+     * @return Placeholder
+     */
+    //$language-placeholder-src Language placeholder
     static Language placeholder() {
-        return Language(
-            "", std::vector<std::string>(), "", nullptr,
-            [](std::string) { return false; },
-            [](std::string) { return false; });
+        return Language("", std::vector<std::string>(), "", nullptr, nullptr);
     }
 
+  private:
     /**
      * @brief The constructor for the language.
      *
@@ -205,20 +269,15 @@ struct Language {
      * @param extensions File extensions for the languages
      * @param query Query for the data
      * @param language Language object for parsing
-     * @param validate_comment Function to validate that a supplied string is an
      * appropriate comment
-     * @param validate_object Function to validate that a supplied string isn't
+     * @param validator Validator object that can be used to validate captures
      * a comment
      */
     Language(const std::string name, const std::vector<std::string> &extensions,
              const std::string query, const TSLanguage *language,
-             std::function<bool(std::string)> validate_comment,
-             std::function<bool(std::string)> validate_object)
+             std::unique_ptr<CaptureValidator> validator)
         : name(name), extensions(extensions), query(query), language(language),
-          validate_comment(validate_comment), validate_object(validate_object) {
-    }
+          validator(std::move(validator)) {}
 };
-
-
 
 } // namespace lect

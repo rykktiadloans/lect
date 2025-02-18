@@ -1,5 +1,0 @@
-# Export the documentation
-
-Function annotations_to_json() at $json-src translates text and code annotations into a single JSON object.
-
-Said JSON object can then be passed into the export_to_dir() function at $export-src which will then create the documentation at the supplied directory

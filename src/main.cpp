@@ -10,7 +10,6 @@
 #include "structures.hpp"
 #include "vis_js.hpp"
 
-//$main-src Main function
 int main(int argc, char **argv) {
 
     // We'll need this one
@@ -18,7 +17,7 @@ int main(int argc, char **argv) {
 
     std::unique_ptr<lect::Settings> settings;
     try {
-        settings = std::make_unique<lect::Settings>(argc, argv);
+        settings = lect::Settings::build_with_args(argc, argv);
     } catch (lect::Exception e) {
         if (std::string(e.what()) == "help") {
             return 0;
@@ -28,20 +27,12 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    std::vector<lect::TextAnnotation> text_annotations;
+    lect::Annotations annotations;
     try {
-        text_annotations =
-            lect::extract_text_annotations(settings->text_annotation_path);
-    } catch (lect::Exception e) {
-        if (true) {
-            return 1;
-        }
-    }
-
-    std::vector<lect::CodeAnnotation> code_annotations;
-    try {
-        code_annotations = lect::extract_code_annotations(
-            settings->code_annotation_path, settings->language);
+        annotations = lect::AnnotationsBuilder()
+            .extract_text_annotations(settings->text_annotation_path)
+            .extract_code_annotations(settings->code_annotation_path, settings->language)
+            .get_annotations();
     } catch (lect::Exception e) {
         if (true) {
             return 1;
@@ -49,14 +40,14 @@ int main(int argc, char **argv) {
     }
 
     try {
-        settings->checker->check(text_annotations, code_annotations);
+        settings->checker->check(annotations);
     } catch (lect::Exception e) {
         std::cout << lect::color_red + "ERROR: " + lect::color_reset + e.what()
                   << "\n";
         return 1;
     }
 
-    auto dict = lect::annotations_to_json(text_annotations, code_annotations);
+    auto dict = settings->export_preprocessing(annotations);
 
     try {
         lect::export_to_dir(settings->output_path, dict);

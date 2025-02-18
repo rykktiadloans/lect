@@ -72,7 +72,7 @@ let options = {
             nodeSpacing: 200,
             treeSpacing: 300,
             blockShifting: true,
-            edgeMinimization: true,
+            edgeMinimization: false,
             parentCentralization: false,
             direction: 'UD',        // UD, DU, LR, RL
             sortMethod: 'directed',  // hubsize, directed

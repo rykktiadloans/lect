@@ -21,20 +21,17 @@ namespace lect {
  * @brief A function that takes in the text and code annotations and makes a
  * JSON document out of them
  *
- * @param text_annotations A vector of text annotations
- * @param code_annotations A vector of code annotations
+ * @param annotations Annotations
  * @return
  */
-//$json-src JSON export
 nlohmann::json
-annotations_to_json(const std::vector<TextAnnotation> &text_annotations,
-                    const std::vector<CodeAnnotation> &code_annotations) {
+annotations_to_json(const Annotations &annotations) {
     using namespace nlohmann;
 
     json dict = {{"text_annotations", json::array()},
                  {"code_annotations", json::array()}};
 
-    for (const auto &a : text_annotations) {
+    for (const auto &a : annotations.text_annotations) {
         json t = {{"id", a.id},
                   {"title", a.title},
                   {"content", a.content},
@@ -45,7 +42,7 @@ annotations_to_json(const std::vector<TextAnnotation> &text_annotations,
         dict["text_annotations"].push_back(t);
     }
 
-    for (const auto &a : code_annotations) {
+    for (const auto &a : annotations.code_annotations) {
         json t = {{"id", a.id},
                   {"title", a.title},
                   {"content", a.content},
@@ -57,6 +54,11 @@ annotations_to_json(const std::vector<TextAnnotation> &text_annotations,
     return dict;
 }
 
+nlohmann::json add_direction(nlohmann::json &dict, const std::string &dir) {
+    dict["dir"] = dir;
+    return dict;
+}
+
 /**
  * @brief Generate the documentation at the directory at path using the
  * annotations in the JSON document
@@ -64,7 +66,6 @@ annotations_to_json(const std::vector<TextAnnotation> &text_annotations,
  * @param path Path at which to create the documentation
  * @param json JSON that contains the annotations
  */
-//$export-src Export the documentation
 void export_to_dir(const std::filesystem::path &path,
                    const nlohmann::json &json) noexcept(false) {
 

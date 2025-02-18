@@ -1,0 +1,5 @@
+# Strategy pattern
+
+Strategy pattern is a behavioral pattern that allows us to group a family of related algorithms behind a single interface and select the one we need to use at runtime.
+
+This allows us to decouple the class from its behavior and lets us limit the amount of potential derived classes.

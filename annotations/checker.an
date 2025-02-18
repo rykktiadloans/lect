@@ -1,3 +1,0 @@
-# Checkers
-
-Checker class at $checker-src is an abstract class that uses a Chain of Responsibility pattern to sequentially check text and code annotations for any errors. If any error is detected, an exception is thrown.

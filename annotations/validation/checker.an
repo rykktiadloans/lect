@@ -1,0 +1,9 @@
+# Checker class
+
+Objects that implement the Checker class $checker-src can be used for validating the correctness of the final annotation net.
+
+Each subclass of Checker implements a unique algorithm that checks that the annotations don't have a specific problem, for example duplicate IDs. If the problem is found, and exception is raised.
+
+Checker class implements the chain or responsibility pattern $chain-of-responsibility.Each checker has a reference to the next checker, which makes it easy to construct a sequence of checks dynamically, which will sequentially check the annotations against each of the checkers in the sequence. This is convenient for adding additional optional checks that can be activated using CLI arguments.
+
+It also uses the template method pattern $template-method. The parent Checker class defines a high-level function that calls a private virtual helper function that actually checks the annotations, and then calls the next checker if there is one. This means that when creating the subclass, we only need to write a specific algorithm in the helper function, while the parent class handles whether to call the next checker.

@@ -1,3 +1,0 @@
-# Language class
-
-Language class at $language-src is a class that contains data needed for parsing a certain programming language, such as language's used extensions, query string for finding all the annotations, as well as functions for validating the correct form of annotation comments, and making sure that the captured object isn't some other comment

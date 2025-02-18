@@ -1,0 +1,6 @@
+# Domains of the application
+
+$domain-model
+$extract
+$configuration
+$validation

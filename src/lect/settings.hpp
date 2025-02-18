@@ -7,6 +7,8 @@
 #pragma once
 
 #include "checks.hpp"
+#include "export.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "structures.hpp"
 #include <filesystem>
 #include <iostream>
@@ -24,19 +26,25 @@ struct Settings {
     std::filesystem::path code_annotation_path;
     std::filesystem::path output_path;
     Language language{Language::placeholder()};
-    std::unique_ptr<Checker> checker{
-        std::make_unique<IdAllowedSymbolsChecker>()};
+    std::unique_ptr<Checker> checker;
+    std::function<nlohmann::json(const Annotations &)> export_preprocessing;
 
     /**
-     * @brief Uses main() function's argc and argv arguments to construct itself
+     * @brief Uses main() function's argc and argv arguments to construct a
+     * settings object
      *
      * @param argc Number of command line arguments
      * @param argv An array of command line arguments
      */
-    Settings(int argc, char **argv) {
-        checker->add<DuplicateChecker>();
-        checker->add<NonexistentChecker>();
-        checker->add<CycleChecker>();
+    //$settings-builder-src Settings builder method
+    static std::unique_ptr<Settings> build_with_args(int argc, char **argv) {
+        std::unique_ptr<Settings> settings{new Settings()};
+        settings->checker = std::make_unique<IdAllowedSymbolsChecker>();
+        settings->checker->add(std::make_unique<DuplicateChecker>());
+        settings->checker->add(std::make_unique<NonexistentChecker>());
+        settings->checker->add(std::make_unique<CycleChecker>());
+
+        settings->export_preprocessing = annotations_to_json;
 
         int ptr = 1;
         bool text_path_set = false;
@@ -49,34 +57,35 @@ struct Settings {
             if (arg == "-t") {
                 std::string dir = argv[ptr + 1];
                 ptr++;
-                text_annotation_path = dir;
-                if (!std::filesystem::exists(text_annotation_path)) {
+                settings->text_annotation_path = dir;
+                if (!std::filesystem::exists(settings->text_annotation_path)) {
                     throw Exception("Text annotation path `" +
-                                    text_annotation_path.string() +
+                                    settings->text_annotation_path.string() +
                                     "` doesn't exist");
                 }
-                if (!std::filesystem::is_directory(text_annotation_path)) {
-                    throw Exception(
-                        "Text annotation path `" +
-                        std::filesystem::canonical(text_annotation_path)
-                            .string() +
-                        "` must be a directory");
+                if (!std::filesystem::is_directory(
+                        settings->text_annotation_path)) {
+                    throw Exception("Text annotation path `" +
+                                    std::filesystem::canonical(
+                                        settings->text_annotation_path)
+                                        .string() +
+                                    "` must be a directory");
                 }
                 text_path_set = true;
             } else if (arg == "-s") {
                 std::string path = argv[ptr + 1];
                 ptr++;
-                code_annotation_path = path;
-                if (!std::filesystem::exists(code_annotation_path)) {
+                settings->code_annotation_path = path;
+                if (!std::filesystem::exists(settings->code_annotation_path)) {
                     throw Exception("Code annotation path `" +
-                                    code_annotation_path.string() +
+                                    settings->code_annotation_path.string() +
                                     "` doesn't exist");
                 }
                 code_path_set = true;
             } else if (arg == "-o") {
                 std::string path = argv[ptr + 1];
                 ptr++;
-                output_path = path;
+                settings->output_path = path;
                 output_path_set = true;
             } else if (arg == "-l") {
                 std::string lang = argv[ptr + 1];
@@ -88,8 +97,22 @@ struct Settings {
                     throw Exception("Unrecognized language: " + color_blue +
                                     lang + color_reset);
                 }
-                language = constructor->second();
+                settings->language = constructor->second();
                 language_set = true;
+            } else if (arg == "-d") {
+                std::string dir = argv[ptr + 1];
+                ptr++;
+                if (dir != "UD" && dir != "UD" && dir != "LR" && dir != "RL") {
+                    throw Exception("Unrecognized direction: " + color_blue +
+                                    dir + color_reset);
+                }
+                auto f = settings->export_preprocessing;
+                settings->export_preprocessing =
+                    [f, dir](const Annotations &annotations) -> nlohmann::json {
+                        auto dict = f(annotations);
+                        dict = add_direction(dict, dir);
+                        return dict;
+                };
             } else if (arg == "-h" || arg == "--help") {
                 std::cout
                     << "Usage:\n"
@@ -97,13 +120,14 @@ struct Settings {
                        "<language> -o <output>"
                        "  [<optional_args>...]\n\n"
                        "Required arguments:\n"
-                       "  -t          Directory with .an annotation files\n"
-                       "  -s          Source code directory with annotations\n"
-                       "  -l          Programming language of the project\n"
-                       "  -o          Output directory\n\n"
+                       "  -t <path>   Directory with .an annotation files\n"
+                       "  -s <path>   Source code directory with annotations\n"
+                       "  -l <lang>   Programming language of the project\n"
+                       "  -o <path>   Output directory\n\n"
                        "Supported languages:\n"
                        "  c++         C++ (.cpp .c .h .hpp)\n\n"
                        "Optional arguments:\n"
+                       "  -d <dir>  Select a direction (UD, DU, RL, LR)\n"
                        "  -h, --help  Help screen\n";
                 throw Exception("help");
 
@@ -126,6 +150,14 @@ struct Settings {
         if (!language_set) {
             throw Exception("Language isn't set");
         }
+        return settings;
     }
+
+  private:
+    /**
+     * @brief Private constructor. Makes it so that the use of builder in
+     * necessary
+     */
+    Settings() {}
 };
 } // namespace lect

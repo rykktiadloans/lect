@@ -1,6 +1,7 @@
 /**
  * @file checks.hpp
- * @brief A collection of classes that can analyze and check the annotations for errors
+ * @brief A collection of classes that can analyze and check the annotations for
+ * errors
  */
 
 #pragma once
@@ -23,19 +24,22 @@ namespace lect {
  * text and code annotations for any problems
  *
  */
-//$checker-src Checker classes
+//$checker-src Checker class
 struct Checker {
 
     /**
-     * @brief Check text and code annotations for any errors
+     * @brief Check text and code annotations for any errors. If there aren't
+     * any, pass them to the next checker
      *
-     * @param text_annotations Vector of text annotations
-     * @param code_annotations Vector of code annotations
+     * @param annotations Annotations to check
      * @throw lect::Exception
      */
-    virtual void
-    check(std::vector<TextAnnotation> &text_annotations,
-          std::vector<CodeAnnotation> &code_annotations) noexcept(false) = 0;
+    void check(const Annotations &annotations) noexcept(false) {
+        _check(annotations);
+        if (m_next.has_value()) {
+            m_next->get()->check(annotations);
+        }
+    };
 
     /**
      * @brief A virtual destructor for subclassing
@@ -47,33 +51,24 @@ struct Checker {
      *
      * @tparam T Type of the checker
      */
-    template <typename T> void add() {
+    void add(std::unique_ptr<Checker> checker) {
         if (!m_next.has_value()) {
-            m_next = std::make_unique<T>();
+            m_next = std::move(checker);
             return;
         }
-        m_next->get()->add<T>();
-    }
-
-    /**
-     * @brief Call the next checker in the sequence, if there is any
-     *
-     * @param text_annotations Vector of text annotations to use on the next
-     * check call
-     * @param code_annotations Vector of code annotations to use on the next
-     * check call
-     * @throw lect::Exception
-     */
-    void next(std::vector<TextAnnotation> &text_annotations,
-              std::vector<CodeAnnotation> &code_annotations) noexcept(false) {
-        if (!m_next.has_value()) {
-            return;
-        }
-        m_next->get()->check(text_annotations, code_annotations);
+        m_next->get()->add(std::move(checker));
     }
 
   private:
     std::optional<std::unique_ptr<Checker>> m_next = std::nullopt;
+
+    /**
+     * @brief A virtual function that can be overridden by subclasses to provide
+     * specific checks
+     *
+     * @param annotations Annotations to check
+     */
+    virtual void _check(const Annotations &annotations) noexcept(false) = 0;
 };
 /**
  * @class CycleChecker
@@ -87,25 +82,24 @@ struct CycleChecker : public Checker {
      */
     virtual ~CycleChecker() override{};
 
+  private:
     /**
      * @brief Function that checks whether there are any cycles of annotation
      * references
      *
-     * @param text_annotations Text annotations to check
-     * @param code_annotations Code annotations to check
+     * @param annotations Annotations to check
      */
-    virtual void check(std::vector<TextAnnotation> &text_annotations,
-                       std::vector<CodeAnnotation>
-                           &code_annotations) noexcept(false) override {
+    virtual void
+    _check(const Annotations &annotations) noexcept(false) override {
         std::unordered_map<std::string, int> text_referenced;
-        for (const auto &text_annotation : text_annotations) {
+        for (const auto &text_annotation : annotations.text_annotations) {
             text_referenced.insert({text_annotation.id, 0});
         }
-        for (const auto &code_annotation : code_annotations) {
+        for (const auto &code_annotation : annotations.code_annotations) {
             text_referenced.insert({code_annotation.id, 0});
         }
 
-        for (const auto &text_annotation : text_annotations) {
+        for (const auto &text_annotation : annotations.text_annotations) {
             for (const auto &ref : text_annotation.references) {
                 text_referenced.at(ref)++;
             }
@@ -123,22 +117,19 @@ struct CycleChecker : public Checker {
 
         std::unordered_map<std::string, TextAnnotation> text_annotation_map;
 
-        for (const auto &text_annotation : text_annotations) {
+        for (const auto &text_annotation : annotations.text_annotations) {
             text_annotation_map.insert({text_annotation.id, text_annotation});
         }
 
         for (const auto &root : roots) {
-            iter(root, text_annotation_map, {});
+            _iter(root, text_annotation_map, {});
         }
-
-        next(text_annotations, code_annotations);
     }
 
-  private:
     void
-    iter(std::string current,
-         std::unordered_map<std::string, TextAnnotation> &text_annotation_map,
-         std::vector<std::string> prev) noexcept(false) {
+    _iter(std::string current,
+          std::unordered_map<std::string, TextAnnotation> &text_annotation_map,
+          std::vector<std::string> prev) noexcept(false) {
         auto found = std::find(prev.begin(), prev.end(), current);
         if (found != prev.end()) {
             std::string m = "There is a cycle of referenced text annotations: ";
@@ -158,7 +149,7 @@ struct CycleChecker : public Checker {
         std::vector<std::string> new_prev(prev);
         new_prev.push_back(current);
         for (const auto &ref : a.references) {
-            iter(ref, text_annotation_map, new_prev);
+            _iter(ref, text_annotation_map, new_prev);
         }
     }
 };
@@ -174,36 +165,36 @@ struct NonexistentChecker : public Checker {
      */
     virtual ~NonexistentChecker() override{};
 
+  private:
     /**
      * @brief A function that checks for any annotations that reference
      * nonexistent annotations
      *
-     * @param text_annotations Text annotations to check
-     * @param code_annotations Code annotations to check
+     * @param annotations Annotations to check
      * @throw lect::Exception
      */
-    virtual void check(std::vector<TextAnnotation> &text_annotations,
-                       std::vector<CodeAnnotation>
-                           &code_annotations) noexcept(false) override {
+    virtual void
+    _check(const Annotations &annotations) noexcept(false) override {
         std::vector<std::string> ids;
 
-        for (const auto &an : text_annotations) {
+        for (const auto &an : annotations.text_annotations) {
             ids.push_back(an.id);
         }
 
-        for (const auto &an : code_annotations) {
+        for (const auto &an : annotations.code_annotations) {
             ids.push_back(an.id);
         }
 
-        for (const auto &an : text_annotations) {
+        for (const auto &an : annotations.text_annotations) {
             for (const auto &ref : an.references) {
                 auto it = std::find(ids.begin(), ids.end(), ref);
                 if (it == ids.end()) {
-                    throw Exception("Annotation `" + ref + "` in text annotation `" + an.id + "` doesn't exist");
+                    throw Exception("Annotation `" + ref +
+                                    "` in text annotation `" + an.id +
+                                    "` doesn't exist");
                 }
             }
         }
-        next(text_annotations, code_annotations);
     }
 };
 
@@ -218,17 +209,16 @@ struct IdAllowedSymbolsChecker : public Checker {
      */
     virtual ~IdAllowedSymbolsChecker() override{};
 
+  private:
     /**
      * @brief A function that checks whether all annotation IDs contain only
      * allowed characters
      *
-     * @param text_annotations Text annotations to check
-     * @param code_annotations Code annotations to check
+     * @param annotations Annotations to check
      */
-    virtual void check(std::vector<TextAnnotation> &text_annotations,
-                       std::vector<CodeAnnotation>
-                           &code_annotations) noexcept(false) override {
-        for (const auto &an : text_annotations) {
+    virtual void
+    _check(const Annotations &annotations) noexcept(false) override {
+        for (const auto &an : annotations.text_annotations) {
             uint64_t p = an.id.find_first_not_of(
                 "abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ");
             if (p != std::string::npos) {
@@ -237,7 +227,7 @@ struct IdAllowedSymbolsChecker : public Checker {
             }
         }
 
-        for (const auto &an : code_annotations) {
+        for (const auto &an : annotations.code_annotations) {
             uint64_t p = an.id.find_first_not_of(
                 "abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ");
             if (p != std::string::npos) {
@@ -245,7 +235,6 @@ struct IdAllowedSymbolsChecker : public Checker {
                                         "and hyphens are allowed");
             }
         }
-        next(text_annotations, code_annotations);
     }
 };
 
@@ -263,15 +252,13 @@ struct DuplicateChecker : public Checker {
     /**
      * @brief A function that checks whether all annotations have unique IDs
      *
-     * @param text_annotations Text Annotations to check
-     * @param code_annotations Code annotations to check
+     * @param annotations Annotations to check
      */
-    virtual void check(std::vector<TextAnnotation> &text_annotations,
-                       std::vector<CodeAnnotation>
-                           &code_annotations) noexcept(false) override {
+    virtual void
+    _check(const Annotations &annotations) noexcept(false) override {
         std::set<std::string> id_set;
 
-        for (const auto &annotation : text_annotations) {
+        for (const auto &annotation : annotations.text_annotations) {
             if (id_set.find(annotation.id) != id_set.end()) {
                 throw Exception("There are at least 2 annotations with ID " +
                                 annotation.id);
@@ -279,14 +266,13 @@ struct DuplicateChecker : public Checker {
             id_set.insert(annotation.id);
         }
 
-        for (const auto &annotation : code_annotations) {
+        for (const auto &annotation : annotations.code_annotations) {
             if (id_set.find(annotation.id) != id_set.end()) {
                 throw Exception("There are at least 2 annotations with ID " +
                                 annotation.id);
             }
             id_set.insert(annotation.id);
         }
-        next(text_annotations, code_annotations);
     }
 };
 

@@ -1,0 +1,5 @@
+# Settings builder method
+
+Settings' static lect::Settings::build_with_args method $settings-builder-src creates a Settings object and populates it based on the supplied CLI arguments. It can also raise an exception if there is some problem with the input, such as lack of a supplied directory with annotations. It is also used for printing the help page.
+
+This method leverages the builder pattern $builder in order to encapsulate the parsing process and abstract away the Settings object's instantiation behind a fairly simple interface.
