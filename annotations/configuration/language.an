@@ -1,6 +1,9 @@
 # Language
 
-$language-builder
-$language-placeholder
-$language-validator
-$language-src
+Language class $language-src encapsulats all the data necessary for processing and extracting code annotations from a specific programming language, such as its extensions.
+
+Class' constructor is privated, to instantiate one you have to use one of the static builder methods $language-builder, one for each supported programming language.
+
+There is also a method for making a placeholder language object $language-placeholder that is mostly just a stub.
+
+A language object also contains a $language-validator object for validating the captured code annotations.
