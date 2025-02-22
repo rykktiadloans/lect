@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <optional>
 #include <set>
@@ -92,11 +93,14 @@ struct CycleChecker : public Checker {
     virtual void
     _check(const Annotations &annotations) noexcept(false) override {
         std::unordered_map<std::string, int> text_referenced;
+        std::vector<std::string> all_reference_ids;
         for (const auto &text_annotation : annotations.text_annotations) {
             text_referenced.insert({text_annotation.id, 0});
+            all_reference_ids.push_back(text_annotation.id);
         }
         for (const auto &code_annotation : annotations.code_annotations) {
             text_referenced.insert({code_annotation.id, 0});
+            all_reference_ids.push_back(code_annotation.id);
         }
 
         for (const auto &text_annotation : annotations.text_annotations) {
@@ -121,15 +125,30 @@ struct CycleChecker : public Checker {
             text_annotation_map.insert({text_annotation.id, text_annotation});
         }
 
+        std::set<std::string> total_prev;
         for (const auto &root : roots) {
-            _iter(root, text_annotation_map, {});
+            _iter(root, text_annotation_map, {}, total_prev);
+        }
+
+        if (total_prev.size() == annotations.text_annotations.size() +
+                                     annotations.code_annotations.size()) {
+            return;
+        }
+        std::vector<std::string> potentially_completely_cyclical;
+        std::set_difference(all_reference_ids.begin(), all_reference_ids.end(),
+                            total_prev.begin(), total_prev.end(),
+                            std::inserter(potentially_completely_cyclical, potentially_completely_cyclical.begin()));
+
+        for(const auto &annotation : potentially_completely_cyclical) {
+            _iter(annotation, text_annotation_map, {}, total_prev);
         }
     }
 
     void
     _iter(std::string current,
           std::unordered_map<std::string, TextAnnotation> &text_annotation_map,
-          std::vector<std::string> prev) noexcept(false) {
+          std::vector<std::string> prev,
+          std::set<std::string> &total_prev) noexcept(false) {
         auto found = std::find(prev.begin(), prev.end(), current);
         if (found != prev.end()) {
             std::string m = "There is a cycle of referenced text annotations: ";
@@ -148,8 +167,9 @@ struct CycleChecker : public Checker {
         }
         std::vector<std::string> new_prev(prev);
         new_prev.push_back(current);
+        total_prev.insert(current);
         for (const auto &ref : a.references) {
-            _iter(ref, text_annotation_map, new_prev);
+            _iter(ref, text_annotation_map, new_prev, total_prev);
         }
     }
 };
