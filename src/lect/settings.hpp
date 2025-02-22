@@ -71,6 +71,7 @@ struct Settings {
                                     "` must be a directory");
                 }
                 text_path_set = true;
+
             } else if (arg == "-s") {
                 std::string path = argv[ptr + 1];
                 ptr++;
@@ -81,11 +82,13 @@ struct Settings {
                                     "` doesn't exist");
                 }
                 code_path_set = true;
+
             } else if (arg == "-o") {
                 std::string path = argv[ptr + 1];
                 ptr++;
                 settings->output_path = path;
                 output_path_set = true;
+
             } else if (arg == "-l") {
                 std::string lang = argv[ptr + 1];
                 ptr++;
@@ -98,6 +101,7 @@ struct Settings {
                 }
                 settings->language = constructor->second();
                 language_set = true;
+
             } else if (arg == "-d") {
                 std::string dir = argv[ptr + 1];
                 ptr++;
@@ -106,6 +110,11 @@ struct Settings {
                                     dir + color_reset);
                 }
                 settings->preprocessing_builder.add_direction(dir);
+
+            } else if (arg == "-r") {
+                settings->preprocessing_builder
+                    .remove_code_annotations_middle();
+
             } else if (arg == "-h" || arg == "--help") {
                 std::cout
                     << "Usage:\n"
@@ -121,13 +130,17 @@ struct Settings {
                        "  c++         C++ (.cpp .c .h .hpp)\n\n"
                        "Optional arguments:\n"
                        "  -d <dir>  Select a direction (UD, DU, RL, LR)\n"
+                       "  -r        Removes the middle lines of code "
+                       "annotations\n"
                        "  -h, --help  Help screen\n";
                 throw Exception("help");
 
             } else {
                 throw Exception("Unrecognized argument: " + color_blue + arg +
                                 color_reset);
+
             }
+
             ptr++;
         }
 

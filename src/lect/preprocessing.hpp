@@ -3,6 +3,7 @@
 #include "nlohmann/json.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include "structures.hpp"
+#include <cstdint>
 #include <functional>
 #include <iostream>
 #include <string>
@@ -47,9 +48,11 @@ struct Preprocessing {
  */
 struct PrepocessingBuilder {
     /**
-     * @brief Adds a step that adds a direction of the tree to the final JSON file
+     * @brief Adds a step that adds a direction of the tree to the final JSON
+     * file
      *
-     * @param direction The direction string, should be either "UD", "DU", "RL" or "LR"
+     * @param direction The direction string, should be either "UD", "DU", "RL"
+     * or "LR"
      * @return The reference to the builder
      */
     PrepocessingBuilder &add_direction(std::string direction) {
@@ -61,6 +64,15 @@ struct PrepocessingBuilder {
         return *this;
     }
 
+    PrepocessingBuilder &remove_code_annotations_middle() {
+        auto prev = _annotations_preprocessing;
+        _annotations_preprocessing = [prev](Annotations &annotations) {
+            _remove_code_annotations_middle(annotations);
+            prev(annotations);
+        };
+        return *this;
+    }
+
     /**
      * @brief Resolves and builds the final preprocessing object
      *
@@ -68,8 +80,11 @@ struct PrepocessingBuilder {
      */
     Preprocessing build() {
         auto json_preprocessing = _json_preprocessing;
+        auto annotations_preprocessing = _annotations_preprocessing;
         std::function<nlohmann::json(Annotations &)> function =
-            [json_preprocessing](Annotations &annotations) {
+            [json_preprocessing,
+             annotations_preprocessing](Annotations &annotations) {
+                annotations_preprocessing(annotations);
                 auto dict = _annotations_to_json(annotations);
                 return json_preprocessing(dict);
             };
@@ -79,6 +94,9 @@ struct PrepocessingBuilder {
   private:
     std::function<nlohmann::json(nlohmann::json &)> _json_preprocessing =
         [](nlohmann::json &dict) { return dict; };
+
+    std::function<void(Annotations &)> _annotations_preprocessing =
+        [](Annotations &) {};
 
     static nlohmann::json _annotations_to_json(const Annotations &annotations) {
         using namespace nlohmann;
@@ -113,6 +131,21 @@ struct PrepocessingBuilder {
                                          const std::string &dir) {
         dict["dir"] = dir;
         return dict;
+    }
+
+    static void _remove_code_annotations_middle(Annotations &annotations) {
+        for (auto &annotation : annotations.code_annotations) {
+            uint64_t first_newline = annotation.content.find_first_of("\n");
+            uint64_t last_newline = annotation.content.find_last_of("\n");
+            if (first_newline == std::string::npos ||
+                last_newline == std::string::npos) {
+                continue;
+            }
+            annotation.content =
+                annotation.content.substr(0, first_newline + 1) + "  ..." +
+                annotation.content.substr(
+                    last_newline, annotation.content.size() - last_newline);
+        }
     }
 };
 } // namespace lect
