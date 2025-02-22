@@ -1,3 +1,13 @@
+"use strict"; // plsssssssxxs
+let direction = annotationsJSON.dir === undefined ? "UD" : annotationsJSON.dir;
+let levelSeparation = 200;
+let nodeSpacing = 130;
+
+if(direction === "UD" || direction === "DU") {
+    levelSeparation = 120;
+    nodeSpacing = 200;
+}
+
 let nodes = [];
 
 for (let el of annotationsJSON.code_annotations) {
@@ -68,13 +78,13 @@ let options = {
         clusterThreshold: 150,
         hierarchical: {
             enabled: true,
-            levelSeparation: 120,
-            nodeSpacing: 200,
+            levelSeparation: levelSeparation, // 120 vert 170 hor
+            nodeSpacing: nodeSpacing,     // 200 vert 100 hor
             treeSpacing: 300,
             blockShifting: true,
-            edgeMinimization: false,
-            parentCentralization: false,
-            direction: 'UD',        // UD, DU, LR, RL
+            edgeMinimization: true,
+            parentCentralization: true,
+            direction: direction,        // UD, DU, LR, RL
             sortMethod: 'directed',  // hubsize, directed
             shakeTowards: 'leaves'  // roots, leaves
         }
@@ -148,6 +158,7 @@ function onNodeClick(event) {
     viewer.style.display = "flex";
     viewer.querySelector("h4").textContent = annotation.id;
     viewer.querySelector("h1").textContent = annotation.title;
+    viewer.querySelector(".file")?.remove();
     let content = viewer.querySelector(".content");
     content.innerHTML = "";
     for(let line of annotation.content.split("\n")) {
@@ -172,6 +183,7 @@ function onNodeClick(event) {
         content.style.overflowX = "scroll";
         content.style.whiteSpace = "nowrap";
         let file = document.createElement("p");
+        file.classList.add("file");
         file.textContent = annotation.file;
         content.before(file);
     }

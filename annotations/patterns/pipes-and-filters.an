@@ -1,0 +1,5 @@
+# Pipes and Filters pattern
+
+Pipes and Filters is a design pattern where the processing of data is separated into smaller subprocesses called filters, and pipes which pass data between filters. 
+
+Such a pattern can improve flexibility and reusability, since we separate the concerns of the larger transformation process into smaller filters, which can be used in different parts of the application.

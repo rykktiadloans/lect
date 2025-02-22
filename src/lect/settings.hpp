@@ -9,6 +9,7 @@
 #include "checks.hpp"
 #include "export.hpp"
 #include "nlohmann/json_fwd.hpp"
+#include "preprocessing.hpp"
 #include "structures.hpp"
 #include <filesystem>
 #include <iostream>
@@ -27,7 +28,7 @@ struct Settings {
     std::filesystem::path output_path;
     Language language{Language::placeholder()};
     std::unique_ptr<Checker> checker;
-    std::function<nlohmann::json(const Annotations &)> export_preprocessing;
+    PrepocessingBuilder preprocessing_builder;
 
     /**
      * @brief Uses main() function's argc and argv arguments to construct a
@@ -43,8 +44,6 @@ struct Settings {
         settings->checker->add(std::make_unique<DuplicateChecker>());
         settings->checker->add(std::make_unique<NonexistentChecker>());
         settings->checker->add(std::make_unique<CycleChecker>());
-
-        settings->export_preprocessing = annotations_to_json;
 
         int ptr = 1;
         bool text_path_set = false;
@@ -102,17 +101,11 @@ struct Settings {
             } else if (arg == "-d") {
                 std::string dir = argv[ptr + 1];
                 ptr++;
-                if (dir != "UD" && dir != "UD" && dir != "LR" && dir != "RL") {
+                if (dir != "UD" && dir != "DU" && dir != "LR" && dir != "RL") {
                     throw Exception("Unrecognized direction: " + color_blue +
                                     dir + color_reset);
                 }
-                auto f = settings->export_preprocessing;
-                settings->export_preprocessing =
-                    [f, dir](const Annotations &annotations) -> nlohmann::json {
-                        auto dict = f(annotations);
-                        dict = add_direction(dict, dir);
-                        return dict;
-                };
+                settings->preprocessing_builder.add_direction(dir);
             } else if (arg == "-h" || arg == "--help") {
                 std::cout
                     << "Usage:\n"

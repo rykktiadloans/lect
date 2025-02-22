@@ -4,5 +4,5 @@ Using the Domain Model pattern $domain-model, we can divide the application into
 - Configuration $configuration: configuring the program with user-defined options
 - Extraction $extract: extraction of annotations
 - Validation $validation: validating that the extracted annotation net is correct
-- Preprocessing: modifying the annotations to fit their final form
+- Preprocessing $preprocessing: modifying and transforming the annotations to fit their final form
 - Export: generating the final documentation

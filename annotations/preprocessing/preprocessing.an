@@ -1,0 +1,5 @@
+# Preprocessing
+
+After the annotations have been successfully validated, the annotations need to be converted into JSON objects to be used by the documentation frontend, as well as modified in some desired way.
+
+While the final preproccessing is encapsulated in the Preprocessing class $preprocessing-src, class PreprocessingBuilder $preprocessing-builder is ultimately responsible for managing the preprocessing process.

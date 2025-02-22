@@ -6,6 +6,7 @@
 #include "checks.hpp"
 #include "export.hpp"
 #include "extract.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "settings.hpp"
 #include "structures.hpp"
 #include "vis_js.hpp"
@@ -47,7 +48,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    auto dict = settings->export_preprocessing(annotations);
+    nlohmann::json dict = settings->preprocessing_builder.build().preprocess(annotations);
 
     try {
         lect::export_to_dir(settings->output_path, dict);

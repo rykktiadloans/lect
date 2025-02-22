@@ -73,6 +73,7 @@ add_library(lect_lib STATIC
     ${SRC_DIR}/lect/structures.hpp
     ${SRC_DIR}/lect/checks.hpp
     ${SRC_DIR}/lect/settings.hpp
+    ${SRC_DIR}/lect/preprocessing.hpp
 )
 
 target_link_libraries(lect_lib PUBLIC tree-sitter tree-sitter-cpp nlohmann_json::nlohmann_json resources)
