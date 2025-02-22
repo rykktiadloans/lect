@@ -136,6 +136,10 @@ let network = new vis.Network(container, data, options);
 
 let viewer = document.querySelector("#viewer");
 
+function onRefClick(ref) {
+    selectNode(ref);
+}
+
 function onNodeClick(event) {
     network.unselectAll();
     let nodes = event.nodes;
@@ -145,9 +149,12 @@ function onNodeClick(event) {
     if (nodes.length > 1) {
         return;
     }
-    let isCode = false;
-    let nodeId = nodes[0];
+    selectNode(nodes[0]);
 
+}
+
+function selectNode(nodeId) {
+    let isCode = false;
     let annotation = annotationsJSON.text_annotations
         .find((annotation) => nodeId === annotation.id);
     if (annotation === undefined) {
@@ -161,7 +168,16 @@ function onNodeClick(event) {
     viewer.querySelector(".file")?.remove();
     let content = viewer.querySelector(".content");
     content.innerHTML = "";
-    for(let line of annotation.content.split("\n")) {
+    let split = annotation.content.split("\n");
+    for(let line of split) {
+        if(!isCode) {
+            let refs = annotation.references;
+            for(let ref of refs) {
+                line = line.replace("$" + ref, 
+                    `<a href="#${ref}" onclick="onRefClick('${ref}')">$${ref}</a>`);
+            }
+
+        }
         let pos = 0;
         for(let char of line) {
             if(char != " ") {
@@ -169,12 +185,10 @@ function onNodeClick(event) {
             }
             pos++;
         }
-        console.log(pos, line);
         for(let i = 0; i < pos; i++) {
             content.innerHTML += "&#x00A0";
         }
-        content.appendChild(document.createTextNode(line));
-        content.append(document.createElement("br"));
+        content.innerHTML += line + "<br/>";
 
     }
     if(isCode) {
@@ -184,7 +198,7 @@ function onNodeClick(event) {
         content.style.whiteSpace = "nowrap";
         let file = document.createElement("p");
         file.classList.add("file");
-        file.textContent = annotation.file;
+        file.textContent = annotation.file + ":" + annotation.line;
         content.before(file);
     }
     else {
