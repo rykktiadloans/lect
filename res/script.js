@@ -3,6 +3,7 @@ let direction = annotationsJSON.dir === undefined ? "UD" : annotationsJSON.dir;
 let levelSeparation = 200;
 let nodeSpacing = 130;
 
+
 if(direction === "UD" || direction === "DU") {
     levelSeparation = 120;
     nodeSpacing = 200;
@@ -141,7 +142,6 @@ function onRefClick(ref) {
 }
 
 function onNodeClick(event) {
-    network.unselectAll();
     let nodes = event.nodes;
     if (nodes.length === 0) {
         return;
@@ -149,6 +149,7 @@ function onNodeClick(event) {
     if (nodes.length > 1) {
         return;
     }
+    network.unselectAll();
     selectNode(nodes[0]);
 
 }

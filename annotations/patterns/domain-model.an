@@ -1,3 +1,5 @@
 # Domain model pattern
 
-The domain model pattern defines and scopes program's responsibilities and requirements and separates it into elements. Its useful in transforming abstract requirements into concrete software.
+The domain model pattern defines and scopes program's responsibilities and requirements and separates it into specific elements. 
+
+Its useful in transforming abstract requirements into concrete software.

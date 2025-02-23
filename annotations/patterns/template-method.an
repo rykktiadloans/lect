@@ -2,4 +2,4 @@
 
 Template method pattern is a behavior pattern that defines a specific method in the base class that describes a high-level algorithm out of virtual functions, which can then be overridden by subclasses to define a new behavior.
 
-It allows us to reduce code duplication by extracting the common logic to the superclass, while letting the subclasses to implements what they need.
+It allows us to reduce code duplication by extracting the common algorithm logic to the superclass, while letting the subclasses to implements what they need.
