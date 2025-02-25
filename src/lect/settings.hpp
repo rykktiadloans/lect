@@ -107,7 +107,8 @@ struct Settings {
                 ptr++;
                 if (dir != "UD" && dir != "DU" && dir != "LR" && dir != "RL") {
                     throw Exception("Unrecognized direction: " + color_blue +
-                                    dir + color_reset);
+                                    dir + color_reset + 
+                                    "\nCan be either `RL`, `LR`, `UD`, `DU`");
                 }
                 settings->preprocessing_builder.add_direction(dir);
 

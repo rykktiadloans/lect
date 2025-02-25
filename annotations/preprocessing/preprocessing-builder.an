@@ -1,6 +1,6 @@
 # Preprocessing builder
 
-PreprocessingBuilder $preprocessing-builder-src is a class that is responsible for constructing a function that takes annotations and converts/modifies them into a JSON document.
+PreprocessingBuilder $preprocessing-builder-src is a class that is responsible for constructing a function that takes annotations and converts/modifies them into a JSON document. Thus, it can be said to be the preprocessing domain object $domain-object
 
 PreprocessingBuilder implements the Pipes and Filters pattern $pipes-and-filters, since the final function is composed dynamically using other, smaller functions that each implement a specific transformation. In contrast to usual implementations of this pattern, ProcessingBuilder internally uses higher-order functions.
 

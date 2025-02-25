@@ -1,6 +1,6 @@
 # Checker class
 
-Objects that implement the Checker class $checker-src can be used for validating the correctness of the final annotation net.
+Objects that implement the Checker class $checker-src can be used for validating the correctness of the final annotation net. It is the validation domain object $domain-object
 
 Each subclass of Checker implements a unique algorithm that checks that the annotations don't have a specific problem, for example duplicate IDs. If the problem is found, and exception is raised.
 
