@@ -21,13 +21,10 @@ jobs:
         run: mkdir build-win
 
       - name: Run CMake for Windows with MINGW
-        run: cmake --fresh -S . -B build-win/ -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_TOOLCHAIN_FILE=~/mingw-w64-x86_64.cmake -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ -DCMAKE_GENERATOR='MinGW Makefiles' -DCMAKE_FIND_ROOT_PATH=/usr/x86_64-w64-mingw32 -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY
+        run: cmake --fresh -S . -B build-win/ -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ -DCMAKE_FIND_ROOT_PATH=/usr/x86_64-w64-mingw32 -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY
 
       - name: Compile for Windows with MINGW
         run: cd build-win && make
-
-      - name: Debug
-        run: ls -la build-win
 
       - name: Move executable
         run: mv build-win/lect.exe lect-win.exe

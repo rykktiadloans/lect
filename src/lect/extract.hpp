@@ -274,7 +274,7 @@ struct AnnotationsBuilder {
         std::ifstream file(path);
         bool first = true;
 
-        std::string id(path.stem());
+        std::string id(path.stem().string());
         std::string title;
         std::string content;
         std::string current_line;
