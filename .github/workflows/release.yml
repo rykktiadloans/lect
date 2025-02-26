@@ -24,9 +24,6 @@ jobs:
         run: ls -la
 
       - name: Debugs
-        run: ls -la build
-
-      - name: Debugs
         run: ls -la build-win
 
       - name: Run CMake for Windows with MINGW
