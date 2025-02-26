@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install necessary packages
-        run: sudo apt update && sudo apt install cmake clang-18 pkg-config mingw-w64
+        run: sudo apt update && sudo apt install cmake clang-18 pkg-config mingw-w64 zip
 
       - name: Run CMake for Linux
         run: mkdir build && cmake -S . -B build/ -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
@@ -35,12 +35,12 @@ jobs:
       - name: Compile for Windows with MINGW
         run: cd build-win && make
 
-      - name: Move executable
-        run: mv build-win/lect.exe lect-win.exe
+      - name: Create an archive for Windows
+        run: zip lect-win.zip build-win/lect.exe /usr/lib/gcc/x86_64-w64-mingw32/13-win32/libgcc_s_seh-1.dll /usr/lib/gcc/x86_64-w64-mingw32/13-win32/libgstdc++-6.dll
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with: 
           files: |
             lect-linux
-            lect-win.exe
+            lect-win.zip
