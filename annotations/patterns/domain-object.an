@@ -1,3 +1,3 @@
 # Domain Object pattern
 
-Sample
+The core idea of the domain object pattern is to encapsulate a certain domain inside an object, which makes it easier to separate concern, as well as provide a relatively small interface to the other parts of the application.
