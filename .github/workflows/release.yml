@@ -1,0 +1,46 @@
+name: Release a new Lect version
+
+on:
+  push:
+    tags: 
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install necessary packages
+      run: sudo apt update && sudo apt install cmake clang-18 pkg-config
+
+    - name: Run CMake
+      run: mkdir build && cmake -S . -B build/ -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+
+    - name: Compile
+      run: cd build && make
+
+    - name: Create Release
+      id: create_release
+      uses: comnoco/create-release-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref_name }}
+        body: Github Actions release
+        draft: false
+        prerelease: false
+
+    - name: Upload executable to the release
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+        asset_path: ./lect
+        asset_name: lect-linux-amd64
+        asset_content_type: application/octet-stream
