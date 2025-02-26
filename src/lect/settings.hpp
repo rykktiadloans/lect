@@ -16,6 +16,28 @@
 #include <memory>
 namespace lect {
 
+const std::string help_string = R"del(
+Usage:
+  lect -t <text_ann_dir> -s <src_dir> -l <language> -o <output> [<optional_args>...]
+
+Required arguments:
+  -t <path>   Directory with .an annotation files
+  -s <path>   Source code directory with annotations
+  -l <lang>   Programming language of the project
+  -o <path>   Output directory
+
+Supported languages:
+  c++         C++ (.cpp .c .h .hpp)
+
+Optional arguments:
+  -d <dir>    Select a direction (UD, DU, RL, LR)
+  -r          Removes the middle lines of code
+              annotations
+  -suf <suf>  Makes the supplied suffix mandatory for
+              code annotations
+  -h, --help  Help screen
+)del";
+
 /**
  * @class Settings
  * @brief A class that parser the CLI arguments and makes an object out of it.
@@ -107,7 +129,7 @@ struct Settings {
                 ptr++;
                 if (dir != "UD" && dir != "DU" && dir != "LR" && dir != "RL") {
                     throw Exception("Unrecognized direction: " + color_blue +
-                                    dir + color_reset + 
+                                    dir + color_reset +
                                     "\nCan be either `RL`, `LR`, `UD`, `DU`");
                 }
                 settings->preprocessing_builder.add_direction(dir);
@@ -115,31 +137,19 @@ struct Settings {
             } else if (arg == "-r") {
                 settings->preprocessing_builder
                     .remove_code_annotations_middle();
+            } else if (arg == "-suf") {
+                std::string suffix = argv[ptr + 1];
+                ptr++;
+                settings->checker->add(
+                    std::make_unique<CodeAnnotationsSuffixChecker>(suffix));
 
             } else if (arg == "-h" || arg == "--help") {
-                std::cout
-                    << "Usage:\n"
-                       "  lect -t <text_ann_dir> -s <src_dir> -l "
-                       "<language> -o <output>"
-                       "  [<optional_args>...]\n\n"
-                       "Required arguments:\n"
-                       "  -t <path>   Directory with .an annotation files\n"
-                       "  -s <path>   Source code directory with annotations\n"
-                       "  -l <lang>   Programming language of the project\n"
-                       "  -o <path>   Output directory\n\n"
-                       "Supported languages:\n"
-                       "  c++         C++ (.cpp .c .h .hpp)\n\n"
-                       "Optional arguments:\n"
-                       "  -d <dir>  Select a direction (UD, DU, RL, LR)\n"
-                       "  -r        Removes the middle lines of code "
-                       "annotations\n"
-                       "  -h, --help  Help screen\n";
+                std::cout << help_string;
                 throw Exception("help");
 
             } else {
                 throw Exception("Unrecognized argument: " + color_blue + arg +
                                 color_reset);
-
             }
 
             ptr++;

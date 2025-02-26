@@ -135,11 +135,13 @@ struct CycleChecker : public Checker {
             return;
         }
         std::vector<std::string> potentially_completely_cyclical;
-        std::set_difference(all_reference_ids.begin(), all_reference_ids.end(),
-                            total_prev.begin(), total_prev.end(),
-                            std::inserter(potentially_completely_cyclical, potentially_completely_cyclical.begin()));
+        std::set_difference(
+            all_reference_ids.begin(), all_reference_ids.end(),
+            total_prev.begin(), total_prev.end(),
+            std::inserter(potentially_completely_cyclical,
+                          potentially_completely_cyclical.begin()));
 
-        for(const auto &annotation : potentially_completely_cyclical) {
+        for (const auto &annotation : potentially_completely_cyclical) {
             _iter(annotation, text_annotation_map, {}, total_prev);
         }
     }
@@ -292,6 +294,45 @@ struct DuplicateChecker : public Checker {
                                 annotation.id);
             }
             id_set.insert(annotation.id);
+        }
+    }
+};
+
+/**
+ * @class CodeAnnotationsSuffixChecker
+ * @brief An optional checker that makes sure that all code annotations have a
+ * specified suffix
+ *
+ */
+struct CodeAnnotationsSuffixChecker : public Checker {
+
+    /**
+     * @brief Virtual destructor
+     */
+    virtual ~CodeAnnotationsSuffixChecker() {}
+
+    /**
+     * @brief A constructor
+     *
+     * @param suffix The suffix with which to check
+     */
+    CodeAnnotationsSuffixChecker(const std::string suffix) : _suffix(suffix) {}
+
+  private:
+    const std::string _suffix;
+
+    virtual void
+    _check(const Annotations &annotations) noexcept(false) override {
+        for (const auto &annotation : annotations.code_annotations) {
+            const std::string id = annotation.id;
+            if (_suffix.size() > id.size() ||
+                _suffix != id.substr(id.size() - _suffix.size())) {
+                throw Exception(
+                    "Code annotation with ID " + color_blue + "'" + id + "'" +
+                    color_reset + " doesn't have suffix " + color_yellow + "'" +
+                    _suffix + "'" + color_reset + ", which was supplied with " +
+                    color_green + "-suf" + color_reset + " argument");
+            }
         }
     }
 };
