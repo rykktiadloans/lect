@@ -3,3 +3,6 @@
 Chain of responsibility is a behavioral pattern that focuses on separating complex processing logic into separate linked handles, where each one can handle the input and/or pass it to the next one.
 
 It allows us to easily dynamically construct chains/trees of handlers, where each one can handle the request and/or pass it to the next one.
+
+Instances of the Chain of responsibility pattern:
+- $checker Checker class

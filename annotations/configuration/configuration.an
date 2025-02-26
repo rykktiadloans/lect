@@ -2,6 +2,4 @@
 
 Before the program can properly start processing information, it first needs to be configured. The program can be configured using CLI arguments.
 
-All the configuration is stored using a Settings object $settings-src, which is the configuration domain object $domain-object. However, to instantiate it, you need to use a static lect::Settings::build_with_args method $settings-builder.
-
-To properly use the program, you also need to specify the programming language used, which is then encapsulated inside the Language object $language, the instance of which is stored inside the settings.
+To properly use the program, you also need to specify the programming language used, which is then encapsulated inside the Language object, the instance of which is stored inside the settings.

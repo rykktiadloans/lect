@@ -1,0 +1,5 @@
+# Capture validator
+
+Capture validator $capture-validator-src is an abstract class that defines an interface to validate the captured parts of a code annotation. Method validate_comment makes sure that the captured comment follows the syntax of the code annotation, while validate_object makes sure that the capture code fragment is not a comment.
+
+This class implements the strategy pattern. The class only defines an interface of the validator, while the actual algorithms are implemented by the subclasses. It allows the client classes to easily swap out the implementations as needed. It also leads to lesser code duplication, as languages with similar syntax, for example Java and C++ can use the same validator subclass.

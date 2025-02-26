@@ -3,3 +3,9 @@
 Builder pattern is based on separating the internal representation of a class from its construction.
 
 It is helpful when we want to hide the complicated specifics of the object's instantiation and contents, as well as control the exact steps of the object's construction.
+
+Instances of builder:
+- $preprocessing-builder PreprocessingBuilder class
+- $settings-builder Settings::build_with_args method
+- $language-builder Language builder methods
+- $annotations-builder AnnotationsBuilder class

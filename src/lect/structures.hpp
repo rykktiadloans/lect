@@ -230,7 +230,6 @@ struct CSyntaxValidator : public CaptureValidator {
  * source code annotations
  *
  */
-//$language-src Language class
 struct Language {
     std::string name;
     std::vector<std::string> extensions;

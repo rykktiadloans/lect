@@ -1,5 +1,5 @@
 # Language placeholder
 
-One of the potential language instance that can be built is the placeholder $language-placeholder-src. It implements the null object pattern $null-object.
+One of the potential language instance that can be built is the placeholder $language-placeholder-src. It implements the null object pattern.
 
 It is an entirely internal object that shouldn't get outside of the client class that instantiates a language object, but even if it does, it won't capture any files to analyze and won't capture any code annotations.

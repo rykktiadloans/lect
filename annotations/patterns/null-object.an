@@ -3,3 +3,6 @@
 Null object is a behavioral pattern that allows us to replace null references/pointers with neutral objects without any behavior. 
 
 Using such objects allows us to write code that is more readable, and in case something unexpected happens, no side effect will happen.
+
+Instances of null object:
+- $language-placeholder Placeholder instance of the Language class
