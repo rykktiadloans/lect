@@ -64,6 +64,15 @@ struct PrepocessingBuilder {
         return *this;
     }
 
+    PrepocessingBuilder &set_lineup(std::string lineup) {
+        auto prev = _json_preprocessing;
+        _json_preprocessing = [prev, lineup](nlohmann::json &dict) {
+            auto new_dict = prev(dict);
+            return _set_lineup(new_dict, lineup);
+        };
+        return *this;
+    }
+
     PrepocessingBuilder &remove_code_annotations_middle() {
         auto prev = _annotations_preprocessing;
         _annotations_preprocessing = [prev](Annotations &annotations) {
@@ -130,6 +139,12 @@ struct PrepocessingBuilder {
     static nlohmann::json _add_direction(nlohmann::json &dict,
                                          const std::string &dir) {
         dict["dir"] = dir;
+        return dict;
+    }
+
+    static nlohmann::json _set_lineup(nlohmann::json &dict,
+                                      const std::string &lineup) {
+        dict["shake"] = lineup;
         return dict;
     }
 

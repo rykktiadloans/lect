@@ -3,5 +3,3 @@
 Before the annotations can be processed, we need to first extract and store them.
 
 The annotations are stored inside the Annotations object $annotations-src, which contains both code and text annotations.
-
-To extract and store the annotations, we use the AnnotationsBuilder class $annotations-builder.

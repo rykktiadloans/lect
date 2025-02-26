@@ -35,6 +35,8 @@ Optional arguments:
               annotations
   -suf <suf>  Makes the supplied suffix mandatory for
               code annotations
+  -lup <d>    Choose which nodes should be lined up
+              (leaves, roots)
   -h, --help  Help screen
 )del";
 
@@ -142,6 +144,16 @@ struct Settings {
                 ptr++;
                 settings->checker->add(
                     std::make_unique<CodeAnnotationsSuffixChecker>(suffix));
+            } else if (arg == "-lup") {
+                std::string dir = argv[ptr + 1];
+                ptr++;
+                if(dir != "leaves" && dir != "roots") {
+                    throw Exception("Unrecognised lineup " 
+                            + color_yellow + "-lup" + color_reset + " option: "
+                            + color_blue + "'" + dir + "'" + color_reset 
+                            + ".\nAvailable options: 'leaves', 'roots'");
+                }
+                settings->preprocessing_builder.set_lineup(dir);
 
             } else if (arg == "-h" || arg == "--help") {
                 std::cout << help_string;

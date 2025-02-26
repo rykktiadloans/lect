@@ -1,5 +1,6 @@
 "use strict"; // plsssssssxxs
 let direction = annotationsJSON.dir === undefined ? "UD" : annotationsJSON.dir;
+let shake = annotationsJSON.shake === undefined ? "roots" : annotationsJSON.shake;
 let levelSeparation = 200;
 let nodeSpacing = 130;
 
@@ -87,7 +88,7 @@ let options = {
             parentCentralization: true,
             direction: direction,        // UD, DU, LR, RL
             sortMethod: 'directed',  // hubsize, directed
-            shakeTowards: 'leaves'  // roots, leaves
+            shakeTowards: shake // roots, leaves
         }
     },
     edges: {
