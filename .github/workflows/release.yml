@@ -1,8 +1,8 @@
-name: Release a new Lect version
+name: Release on push to tag
 
 on:
   push:
-    tags: 
+    tags:
       - 'v*.*.*'
 
 jobs:
@@ -11,16 +11,16 @@ jobs:
     permissions: write-all
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: ${{ github.ref_name }}
-        body: Github Actions release
-        draft: false
-        prerelease: false
+      - name: Create Release
+        id: create_release
+        uses: comnoco/create-release-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Lect ${{ github.ref }}
+          body: Automatic release
+          draft: false
+          prerelease: false
