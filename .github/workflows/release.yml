@@ -17,6 +17,15 @@ jobs:
       - name: Install necessary packages
         run: sudo apt update && sudo apt install cmake clang-18 pkg-config mingw-w64
 
+      - name: Run CMake for Linux
+        run: mkdir build && cmake -S . -B build/ -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+
+      - name: Compile for Linux
+        run: cd build && make
+
+      - name: Move executable
+        run: mv build/lect lect-linux
+
       - name: Create build dir
         run: mkdir build-win
 
