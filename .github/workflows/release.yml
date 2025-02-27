@@ -14,13 +14,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Clang
+        uses: egor-tensin/setup-clang@v1
+        with:
+          version: 18
+          platform: x64
+
       - name: Debug
-        run: realpath clang++
+        run: realpath cc && realpath c++
 
       - name: Configure CMake
         # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
         # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-        run: cmake -B build/ -DCMAKE_CXX_COMPILER=clang-cl -DCMAKE_C_COMPILER=clang-cl -S .
+        run: cmake -B build/ -DCMAKE_CXX_COMPILER=c++ -DCMAKE_C_COMPILER=cc -S .
       - name: Build
         # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
         run: cmake --build build/
