@@ -92,7 +92,14 @@ jobs:
         run: ls -la .
 
       - name: Rename Windows executable
-        run: mv lect lect-${{ github.ref_name }}-win-x64
+        run: mv lect.exe lect-${{ github.ref_name }}-win-x64.exe
 
       - name: Dubug
         run: ls -la .
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with: 
+          files: |
+            lect-${{ github.ref_name }}-linux-x64
+            lect-${{ github.ref_name }}-win-x64.exe
