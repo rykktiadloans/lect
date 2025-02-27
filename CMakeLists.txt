@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.30.0)
 
-project(lect LANGUAGES CXX C VERSION 0.1.45)
+project(lect LANGUAGES CXX C VERSION 0.1.46)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(STRICT_COMPILE_COMMANDS -Wpedantic -Wall -Wextra -Wno-sign-conversion -Wno-unused-parameter -g)
-set(CFLAGS -static-libgcc)
-set(CXXFLAGS -static-libgcc -static-libstdc++)
+set(STRICT_COMPILE_COMMANDS)
+if(NOT MSVC)
+    set(STRICT_COMPILE_COMMANDS -Wpedantic -Wall -Wextra -Wno-sign-conversion -Wno-unused-parameter -g -static)
+endif()
 set(BUILD_SHARED_LIBS OFF)
 
 include(FetchContent)
@@ -30,7 +31,7 @@ add_res_file(vis_js vis-network.min.js)
 add_library(resources STATIC ${RESOURCES})
 target_include_directories(resources PUBLIC ${SRC_DIR}/resread)
 set_target_properties(resources PROPERTIES LINKER_LANGUAGE CXX)
-target_compile_options(resources PRIVATE ${STRICT_COMPILE_COMMANDS} ${CXXFLAGS})
+target_compile_options(resources PRIVATE ${STRICT_COMPILE_COMMANDS} )
 
 ## Dependencies
 # Tree-sitter
@@ -46,7 +47,7 @@ target_include_directories(tree-sitter
     ${TREE_SITTER_LIB}/include
 )
 
-target_compile_options(tree-sitter PRIVATE ${STRICT_COMPILE_COMMANDS} ${CFLAGS})
+target_compile_options(tree-sitter PRIVATE ${STRICT_COMPILE_COMMANDS})
 
 # C++ Grammar
 add_library(tree-sitter-cpp STATIC
@@ -66,7 +67,7 @@ target_include_directories(tree-sitter
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable(json)
 
-target_compile_options(tree-sitter-cpp PRIVATE ${STRICT_COMPILE_COMMANDS} ${CFLAGS})
+target_compile_options(tree-sitter-cpp PRIVATE ${STRICT_COMPILE_COMMANDS} )
 
 ## Library configuration
 add_library(lect_lib STATIC
@@ -85,10 +86,10 @@ target_include_directories(lect_lib PUBLIC
     ${SRC_DIR}/lect
 )
 
-target_compile_options(lect_lib PRIVATE ${STRICT_COMPILE_COMMANDS} ${CXXFLAGS})
+target_compile_options(lect_lib PRIVATE ${STRICT_COMPILE_COMMANDS} )
 
 ## Target configuration
 # Final executable
 add_executable(lect ${SRC_DIR}/main.cpp)
 target_link_libraries(lect lect_lib )
-target_compile_options(lect PRIVATE ${STRICT_COMPILE_COMMANDS} ${CXXFLAGS})
+target_compile_options(lect PRIVATE ${STRICT_COMPILE_COMMANDS} )
