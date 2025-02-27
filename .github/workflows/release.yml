@@ -35,7 +35,7 @@ jobs:
         run: cmake --build build/
 
       - name: Debug
-        run: ls -la . 
+        run: ls -l ./
 
       - name: Debug
-        run: ls -la build
+        run: ls -l build/
