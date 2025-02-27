@@ -7,40 +7,56 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     permissions: 
       contents: write
+
+    strategy:
+      fail-fast: false
+
+    matrix:
+      os: [ubuntu-latest, windows-latest]
+      build_type: [Release]
+      c_compiler: [clang, cl]
+      include:
+        - os: windows-latest
+          c_compiler: cl
+          cpp_compiler: cl
+        - os: ubuntu-latest
+          c_compiler: clang
+          cpp_compiler: clang++
+      exclude:
+        - os: windows-latest
+          c_compiler: clang
+        - os: ubuntu-latest
+          c_compiler: cl
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install necessary packages
-        run: sudo apt update && sudo apt install cmake clang-18 pkg-config mingw-w64 zip
+      - name: Set reusable strings
+        # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-      - name: Run CMake for Linux
-        run: mkdir build && cmake -S . -B build/ -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+      - name: Configure CMake
+        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+        run: >
+          cmake -B ${{ steps.strings.outputs.build-output-dir }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -S ${{ github.workspace }}
 
-      - name: Compile for Linux
-        run: cd build && make
+      - name: Build
+        # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
-      - name: Move executable
-        run: mv build/lect lect-linux
+      - name: Debug
+        run: ls -la . 
 
-      - name: Create build dir
-        run: mkdir build-win
-
-      - name: Run CMake for Windows with MINGW
-        run: cmake --fresh -S . -B build-win/ -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ -DCMAKE_FIND_ROOT_PATH=/usr/x86_64-w64-mingw32 -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY
-
-      - name: Compile for Windows with MINGW
-        run: cd build-win && make
-
-      - name: Create an archive for Windows
-        run: zip lect-win.zip build-win/lect.exe /usr/lib/gcc/x86_64-w64-mingw32/13-win32/libgcc_s_seh-1.dll /usr/lib/gcc/x86_64-w64-mingw32/13-win32/libgstdc++-6.dll
-
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        with: 
-          files: |
-            lect-linux
-            lect-win.zip
+      - name: Debug
+        run: ls -la build
