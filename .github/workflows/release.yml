@@ -20,8 +20,8 @@ jobs:
         c_compiler: [clang]
         include:
           - os: windows-latest
-            c_compiler: clang
-            cpp_compiler: clang++
+            c_compiler: clang-cl
+            cpp_compiler: clang-cl
           - os: ubuntu-latest
             c_compiler: clang
             cpp_compiler: clang++
@@ -47,7 +47,6 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -S ${{ github.workspace }}
-          -T LLVM-vs2022
 
       - name: Build
         # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
