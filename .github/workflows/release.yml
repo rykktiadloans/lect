@@ -34,8 +34,62 @@ jobs:
         # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
         run: cmake --build build/
 
-      - name: Debug
-        run: ls -l ./
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: lect-${{ github.ref_name }}-win-x64
+          path: build/lect.exe
 
-      - name: Debug
-        run: ls -l build/
+  linux-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install necessary packages
+        run: sudo apt update && sudo apt install cmake clang-18 pkg-config
+
+      - name: Run CMake for Linux
+        run: mkdir build && cmake -S . -B build/ -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+
+      - name: Compile for Linux
+        run: cd build && make
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: lect-${{ github.ref_name }}-linux-x64
+          path: build/lect
+
+  release:
+    needs: [win-build, linux-build]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Linux executable
+        uses: actions/download-artifact@v4
+        with:
+          name: lect-${{ github.ref_name }}-linux-x64
+
+      - name: Dubug
+        run: ls -la .
+
+      - name: Rename Linux executable
+        run: mv lect lect-${{ github.ref_name }}-linux-x64
+
+      - name: Download Windows executable
+        uses: actions/download-artifact@v4
+        with:
+          name: lect-${{ github.ref_name }}-win-x64
+
+      - name: Dubug
+        run: ls -la .
+
+      - name: Rename Windows executable
+        run: mv lect lect-${{ github.ref_name }}-win-x64
+
+      - name: Dubug
+        run: ls -la .
