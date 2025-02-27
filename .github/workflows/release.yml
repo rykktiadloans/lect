@@ -77,9 +77,6 @@ jobs:
         with:
           name: lect-${{ github.ref_name }}-linux-x64
 
-      - name: Dubug
-        run: ls -la .
-
       - name: Rename Linux executable
         run: mv lect lect-${{ github.ref_name }}-linux-x64
 
@@ -88,14 +85,8 @@ jobs:
         with:
           name: lect-${{ github.ref_name }}-win-x64
 
-      - name: Dubug
-        run: ls -la .
-
       - name: Rename Windows executable
         run: mv lect.exe lect-${{ github.ref_name }}-win-x64.exe
-
-      - name: Dubug
-        run: ls -la .
 
       - name: Release
         uses: softprops/action-gh-release@v2
