@@ -64,7 +64,10 @@ jobs:
           path: build/lect
 
   release:
+    runs-on: ubuntu-latest
     needs: [win-build, linux-build]
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
