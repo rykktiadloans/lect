@@ -21,6 +21,8 @@
 #include <thread>
 #include <tree-sitter-cpp.h>
 #include <vector>
+#include <string>
+#include <sstream>
 
 namespace lect {
 
