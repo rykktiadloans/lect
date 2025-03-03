@@ -4,8 +4,11 @@ project(lect LANGUAGES CXX C VERSION 0.1.64)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(STRICT_COMPILE_COMMANDS)
 set(STRICT_COMPILE_COMMANDS -Wpedantic -Wall -Wextra -Wno-sign-conversion -Wno-unused-parameter -g -static)
+if(MINGW)
+    set(STRICT_COMPILE_COMMANDS ${STRICT_COMPILE_COMMANDS} 
+        -static-libstdc++ -static-libgcc)
+endif()
 set(BUILD_SHARED_LIBS OFF)
 
 include(FetchContent)
