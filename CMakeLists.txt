@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.30.0)
 
-project(lect LANGUAGES CXX C VERSION 0.2.3)
+project(lect LANGUAGES CXX C VERSION 0.2.4)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -8,6 +8,7 @@ set(STRICT_COMPILE_COMMANDS -Wpedantic -Wall -Wextra -Wno-sign-conversion -Wno-u
 if(MINGW)
     set(STRICT_COMPILE_COMMANDS ${STRICT_COMPILE_COMMANDS} 
         -static-libstdc++ -static-libgcc)
+    message(STATUS ${STRICT_COMPILE_COMMANDS})
 endif()
 set(BUILD_SHARED_LIBS OFF)
 
