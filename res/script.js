@@ -47,25 +47,6 @@ for (let el of annotationsJSON.text_annotations) {
     }
 }
 
-nodes.forEach(node => {
-    node.sortkey = "0";
-});
-
-nodes.forEach(node => {
-    edges.forEach(edge => {
-        if (edge.to == node.id) {
-            var parent = nodes.find(e => e.id == edge.from);
-            node.sortkey = parent.sortkey + "." + node.id;
-        }
-    })
-});
-
-nodes = nodes.sort((a, b) => {
-    if (a.sortkey > b.sortkey) return 1;
-    if (a.sortkey < b.sortkey) return -1;
-    return 0;
-});
-
 let container = document.querySelector("#network");
 
 let data = {
@@ -137,9 +118,12 @@ let options = {
 let network = new vis.Network(container, data, options);
 
 let viewer = document.querySelector("#viewer");
+let control = document.querySelector("#control");
+let selectedNode = "";
+let clustered = false;
 
 function onRefClick(ref) {
-    selectNode(ref);
+    displayNode(ref);
 }
 
 function onNodeClick(event) {
@@ -150,12 +134,36 @@ function onNodeClick(event) {
     if (nodes.length > 1) {
         return;
     }
-    network.unselectAll();
     selectNode(nodes[0]);
 
 }
 
+function updateControl() {
+    control.innerHTML = "";
+    if(selectedNode === "" || selectedNode.includes("cluster:")) {
+        control.innerHTML = "<p>Select cell to continue</p>";
+        return;
+    }
+    console.log(selectedNode);
+    control.innerHTML = `<p>Selected node with ID <b>$${selectedNode}</b></p>`;
+    control.innerHTML += `<button onclick="displayNode('${selectedNode}')">Display content</button>`
+    if(!clustered) {
+        control.innerHTML += `<button onclick="clusterUnconnectedTo('${selectedNode}')">Hide unconnected</button>`;
+
+    }
+    else {
+        control.innerHTML += `<button onclick="uncluster()">Reveal all</button>`;
+    }
+
+}
+
 function selectNode(nodeId) {
+    selectedNode = nodeId;
+    updateControl();
+
+}
+
+function displayNode(nodeId) {
     let isCode = false;
     let annotation = annotationsJSON.text_annotations
         .find((annotation) => nodeId === annotation.id);
@@ -209,6 +217,31 @@ function selectNode(nodeId) {
         content.style.overflowX = "hidden";
         content.style.whiteSpace = "normal";
     }
+}
+
+function clusterUnconnectedTo(nodeId) {
+    clustered = true;
+    network.clustering.cluster({
+        joinCondition: function(nodeOptions) {
+            let annotation = annotationsJSON.text_annotations.find((el) => el.id === nodeOptions.id);
+            if (annotation === undefined) {
+                annotation = annotationsJSON.code_annotations.find((el) => el.id === nodeOptions.id);
+            }
+            return annotation["connected_to"].indexOf(nodeId) == -1;
+        }
+    });
+    updateControl();
+}
+
+function uncluster() {
+    clustered = false;
+    for(let el of network.body.nodeIndices) {
+        if(network.isCluster(el)) {
+            network.openCluster(el);
+        }
+    }
+    updateControl();
+
 }
 
 network.on("click", onNodeClick);

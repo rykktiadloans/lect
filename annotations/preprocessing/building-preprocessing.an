@@ -1,0 +1,3 @@
+# Preprocessing building
+
+In order to abstract the complex instantiation Preprocessing object correctly, a builder pattern is used. The PreprocessingBuilder $preprocessing-builder class is the builder, and Preprocessing object $preprocessing-src is the product

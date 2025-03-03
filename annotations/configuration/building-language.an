@@ -1,0 +1,3 @@
+# Language Builder Methods
+
+For abstracting the complex details of the language object, a builder pattern was applied. The Language class $language-src is the product of the language builder methods $language-builder 

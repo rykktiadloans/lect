@@ -4,4 +4,4 @@ The AnnotationsBuilder $annotations-builder-src class is tasked with extracting 
 
 It's methods extract_code_annotations and extract_text_annotations can be used to extract the annotations. They also return the AnnotationsBuilder object, so that they can be easily chained. The get_annotations method can be used to resolve and build the final Annotations object. 
 
-This class implements the builder pattern builder to abstract away the complicated extraction process from the consumers and to make the process of instantiating the annotations more straightforward
+This class implements the builder pattern builder to abstract away the complicated extraction process from the consumers and to make the process of instantiating the annotations more straightforward.

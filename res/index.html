@@ -13,12 +13,32 @@
             padding: 0;
         }
 
-        #network {
-            position: relative;
+        #container {
+            display: grid;
+            grid-template-columns: 1fr 250px;
+            grid-template-rows: 100%;
         }
 
-        #network,
-        #viewer {
+        #control {
+            padding: 20px;
+            display: flex;
+            flex-flow: column wrap;
+            color: white;
+            background: linear-gradient(to right, #060606 0%, #1a1a1a 8%);
+        }
+
+        #control > button {
+            width: 80%;
+            align-self: center;
+        }
+
+        #network {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #viewer, #container {
             width: 100vw;
             height: 100vh;
         }
@@ -78,7 +98,12 @@
             <div class="content"></div>
         </div>
     </div>
-    <div id="network"> </div>
+    <div id="container">
+        <div id="network"></div>
+        <div id="control">
+            <p>Select cell to continue</p>
+        </div>
+    </div>
     <script type="text/javascript" src="script.js"></script>
 </body>
 

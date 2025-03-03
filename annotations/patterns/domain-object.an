@@ -3,7 +3,7 @@
 The core idea of the domain object pattern is to encapsulate a certain domain inside an object, which makes it easier to separate concern, as well as provide a relatively small interface to the other parts of the application.
 
 The list of domain objects is:
-- $settings Settings class for the configuration domain
+- $settings-src Settings class for the configuration domain
 - $annotations-builder AnnotationsBuilder class for the extraction domain
 - $preprocessing-builder PreprocessingBuilder class for the preprocessing domain
 - $checker Checker class for the validation domain

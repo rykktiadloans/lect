@@ -1,3 +1,7 @@
 # Language builder methods
 
 The language class uses builder methods for instantiation, which implement the builder pattern. It allows the clients to easily construct a language object instance that fits the currently used language, without having to figure out what exactly it would need to properly process text, making the application simpler.
+
+The currently used methods are:
+- Language::cpp() for C++ $language-cpp-src
+- Language::placeholder() as a null object $language-placeholder

@@ -1,0 +1,3 @@
+# Annotation Builder
+
+For extracting and creating annotations, a builder pattern was used, where AnnotationsBuilder $annotations-builder class is the builder, and Annotations $annotations-src is the product

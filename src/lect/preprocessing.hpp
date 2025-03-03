@@ -6,7 +6,10 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <set>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace lect {
 
@@ -110,6 +113,8 @@ struct PrepocessingBuilder {
     static nlohmann::json _annotations_to_json(const Annotations &annotations) {
         using namespace nlohmann;
 
+        auto connections = _get_connected(annotations);
+
         json dict = {{"text_annotations", json::array()},
                      {"code_annotations", json::array()}};
 
@@ -117,23 +122,81 @@ struct PrepocessingBuilder {
             json t = {{"id", a.id},
                       {"title", a.title},
                       {"content", a.content},
-                      {"references", json::array()}};
-            for (const auto &ref : a.references) {
-                t["references"].push_back(ref);
-            }
+                      {"connected_to", connections.at(a.id)},
+                      {"references",
+                       std::set(a.references.begin(), a.references.end())}};
             dict["text_annotations"].push_back(t);
         }
 
         for (const auto &a : annotations.code_annotations) {
-            json t = {{"id", a.id},
-                      {"title", a.title},
-                      {"content", a.content},
-                      {"file", a.file},
-                      {"line", a.line}};
+            json t = {
+                {"id", a.id},           {"title", a.title},
+                {"content", a.content}, {"file", a.file},
+                {"line", a.line},       {"connected_to", connections.at(a.id)}};
             dict["code_annotations"].push_back(t);
         }
 
         return dict;
+    }
+
+    /**
+     * @brief Gets a mapping between a node and a set of nodes connected to it
+     *
+     * @param annotations Annotations
+     * @return Map of nodes and sets of nodes connected to them
+     */
+    static std::unordered_map<std::string, std::set<std::string>>
+    _get_connected(const Annotations &annotations) {
+        std::unordered_map<std::string, std::set<std::string>> connections;
+        std::unordered_map<std::string, std::set<std::string>> references;
+        std::unordered_map<std::string, int> reference_count;
+        for (const auto &a : annotations.text_annotations) {
+            connections.insert({a.id, {}});
+            references.insert(
+                {a.id, std::set(a.references.begin(), a.references.end())});
+            reference_count.insert({a.id, 0});
+        }
+
+        for (const auto &a : annotations.code_annotations) {
+            connections.insert({a.id, {}});
+            references.insert({a.id, {}});
+            reference_count.insert({a.id, 0});
+        }
+
+        for (const auto &annotations_references : references) {
+            for (const auto &ref : annotations_references.second) {
+                reference_count.at(ref)++;
+            }
+        }
+        std::vector<std::string> roots;
+        for (const auto &[id, count] : reference_count) {
+            if (count == 0) {
+                roots.push_back(id);
+            }
+        }
+
+        for (const auto &root : roots) {
+            _get_connected_iter(root, connections, references, {});
+        }
+
+        return connections;
+    }
+
+    static void _get_connected_iter(
+        std::string node,
+        std::unordered_map<std::string, std::set<std::string>> &connections,
+        const std::unordered_map<std::string, std::set<std::string>>
+            &references,
+        std::set<std::string> prev) {
+
+        prev.insert(node);
+        for (auto &p : prev) {
+            std::set<std::string> &con = connections.at(p);
+            con.insert(prev.begin(), prev.end());
+        }
+        for (const auto &ref : references.at(node)) {
+            _get_connected_iter(ref, connections, references, prev);
+        }
     }
 
     static nlohmann::json _add_direction(nlohmann::json &dict,

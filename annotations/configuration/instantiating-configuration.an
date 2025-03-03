@@ -1,4 +1,4 @@
-# Settings class
+# Instantiating configuration
 
 The Settings object $settings-src is tasked with holding all the information needed to configure the program, which means it's the configuration domain object. However, to instantiate it, you need to use a static lect::Settings::build_with_args method $settings-builder.
 
