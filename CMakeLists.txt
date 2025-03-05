@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.30.0)
 
-project(lect LANGUAGES CXX C VERSION 0.2.5)
+project(lect LANGUAGES CXX C VERSION 0.2.6)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(STRICT_COMPILE_COMMANDS -Wpedantic -Wall -Wextra -Wno-sign-conversion -Wno-unused-parameter -g -static)
 if(MINGW)
     set(STRICT_COMPILE_COMMANDS ${STRICT_COMPILE_COMMANDS} 
-        -B,-static-libstdc++ -static-libgcc)
+        -static-libstdc++ -static-libgcc)
     message(STATUS ${STRICT_COMPILE_COMMANDS})
 endif()
 set(BUILD_SHARED_LIBS OFF)
@@ -49,6 +49,8 @@ target_include_directories(tree-sitter
     ${TREE_SITTER_LIB}/include
 )
 
+target_compile_options(tree-sitter PRIVATE -static-libgcc)
+
 # C++ Grammar
 add_library(tree-sitter-cpp STATIC
     ${TREE_SITTER_CPP}/src/parser.c
@@ -62,6 +64,8 @@ target_include_directories(tree-sitter
     PUBLIC
     ${TREE_SITTER_CPP}/bindings/c
 )
+
+target_compile_options(tree-sitter-cpp PRIVATE -static-libgcc)
 
 # JSON
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
