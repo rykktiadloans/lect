@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.30.0)
 
-project(lect LANGUAGES CXX C VERSION 0.2.6)
+project(lect LANGUAGES CXX C VERSION 0.3.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -17,6 +17,7 @@ include(FetchContent)
 set(SRC_DIR src)
 set(TREE_SITTER_LIB lib/tree-sitter-0.24.7/lib)
 set(TREE_SITTER_CPP lib/tree-sitter-cpp)
+set(JSON_LIB lib/json)
 
 ## Comptime file reads
 set(RESOURCES)
@@ -68,8 +69,15 @@ target_include_directories(tree-sitter
 target_compile_options(tree-sitter-cpp PRIVATE -static-libgcc)
 
 # JSON
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
-FetchContent_MakeAvailable(json)
+add_library(nlohmann_json STATIC
+    ${JSON_LIB}/nlohmann/json.hpp)
+
+target_include_directories(nlohmann_json PUBLIC
+    ${JSON_LIB})
+
+target_compile_options(nlohmann_json PRIVATE ${STRICT_COMPILE_COMMANDS})
+
+set_target_properties(nlohmann_json PROPERTIES LINKER_LANGUAGE CXX)
 
 ## Library configuration
 add_library(lect_lib STATIC
@@ -81,7 +89,7 @@ add_library(lect_lib STATIC
     ${SRC_DIR}/lect/preprocessing.hpp
 )
 
-target_link_libraries(lect_lib PUBLIC tree-sitter tree-sitter-cpp nlohmann_json::nlohmann_json resources)
+target_link_libraries(lect_lib PUBLIC tree-sitter tree-sitter-cpp nlohmann_json resources)
 set_target_properties(lect_lib PROPERTIES LINKER_LANGUAGE CXX)
 
 target_include_directories(lect_lib PUBLIC

@@ -7,7 +7,6 @@
 
 #include "index_html.hpp"
 #include "nlohmann/json.hpp"
-#include "nlohmann/json_fwd.hpp"
 #include "script_js.hpp"
 #include "structures.hpp"
 #include "vis_js.hpp"

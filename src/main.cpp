@@ -6,7 +6,6 @@
 #include "checks.hpp"
 #include "export.hpp"
 #include "extract.hpp"
-#include "nlohmann/json_fwd.hpp"
 #include "settings.hpp"
 #include "structures.hpp"
 #include "vis_js.hpp"
