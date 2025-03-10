@@ -4,9 +4,4 @@ The domain model pattern defines and scopes program's responsibilities and requi
 
 Its useful in transforming abstract requirements into concrete software.
 
-The list of domains in the application is:
-- Configuration $configuration: configuring the program with user-defined options
-- Extraction $extract: extraction of annotations
-- Validation $validation: validating that the extracted annotation net is correct
-- Preprocessing $preprocessing: modifying and transforming the annotations to fit their final form
-- Export: generating the final documentation
+The domains of Lect can be found at $domains

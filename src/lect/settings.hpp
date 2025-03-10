@@ -27,6 +27,7 @@ Required arguments:
 
 Supported languages:
   c++         C++ (.cpp .c .h .hpp)
+  java        Java (.java)
 
 Optional arguments:
   -d <dir>    Select a direction (UD, DU, RL, LR)
@@ -132,7 +133,8 @@ struct Settings {
                 std::string lang = argv[ptr + 1];
                 ptr++;
                 std::unordered_map<std::string, std::function<Language(void)>>
-                    language_map{{"c++", Language::cpp}};
+                    language_map{{"c++", Language::cpp},
+                                 {"java", Language::java}};
                 auto constructor = language_map.find(lang);
                 if (constructor == language_map.end()) {
                     throw Exception("Unrecognized language: " + color_blue +
@@ -213,7 +215,7 @@ struct Settings {
             except += "Language isn't set, try using option " + color_green +
                       "'-l'" + color_reset + "\n";
         }
-        if(except != "") {
+        if (except != "") {
             throw Exception(except.substr(0, except.size() - 1));
         }
         return settings;

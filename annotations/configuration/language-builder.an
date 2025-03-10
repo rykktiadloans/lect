@@ -4,4 +4,5 @@ The language class uses builder methods for instantiation, which implement the b
 
 The currently used methods are:
 - Language::cpp() for C++ $language-cpp-src
+- Language::java() for Java $language-java-src
 - Language::placeholder() as a null object $language-placeholder

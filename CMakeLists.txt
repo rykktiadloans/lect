@@ -1,15 +1,10 @@
 cmake_minimum_required(VERSION 3.30.0)
 
-project(lect LANGUAGES CXX C VERSION 0.3.1)
+project(lect LANGUAGES CXX C VERSION 0.3.2)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(STRICT_COMPILE_COMMANDS -Wpedantic -Wall -Wextra -Wno-sign-conversion -Wno-unused-parameter -g -static)
-if(MINGW)
-    set(STRICT_COMPILE_COMMANDS ${STRICT_COMPILE_COMMANDS} 
-        -static-libstdc++ -static-libgcc)
-    message(STATUS ${STRICT_COMPILE_COMMANDS})
-endif()
 set(BUILD_SHARED_LIBS OFF)
 
 include(FetchContent)
@@ -17,6 +12,7 @@ include(FetchContent)
 set(SRC_DIR src)
 set(TREE_SITTER_LIB lib/tree-sitter-0.24.7/lib)
 set(TREE_SITTER_CPP lib/tree-sitter-cpp)
+set(TREE_SITTER_JAVA lib/tree-sitter-java)
 set(JSON_LIB lib/json)
 
 ## Comptime file reads
@@ -58,7 +54,7 @@ add_library(tree-sitter-cpp STATIC
     ${TREE_SITTER_CPP}/src/scanner.c
 )
 
-target_include_directories(tree-sitter 
+target_include_directories(tree-sitter-cpp
     PRIVATE
     ${TREE_SITTER_CPP}/src/tree_sitter
     ${TREE_SITTER_CPP}/bindings/c
@@ -67,6 +63,21 @@ target_include_directories(tree-sitter
 )
 
 target_compile_options(tree-sitter-cpp PRIVATE -static-libgcc)
+
+# Java Grammar
+add_library(tree-sitter-java STATIC
+    ${TREE_SITTER_JAVA}/src/parser.c
+)
+
+target_include_directories(tree-sitter-java
+    PRIVATE
+    ${TREE_SITTER_JAVA}/src/tree_sitter
+    ${TREE_SITTER_JAVA}/bindings/c
+    PUBLIC
+    ${TREE_SITTER_JAVA}/bindings/c
+)
+
+target_compile_options(tree-sitter-java PRIVATE -static-libgcc)
 
 # JSON
 add_library(nlohmann_json STATIC
@@ -89,7 +100,7 @@ add_library(lect_lib STATIC
     ${SRC_DIR}/lect/preprocessing.hpp
 )
 
-target_link_libraries(lect_lib PUBLIC tree-sitter tree-sitter-cpp nlohmann_json resources)
+target_link_libraries(lect_lib PUBLIC tree-sitter tree-sitter-cpp tree-sitter-java nlohmann_json resources)
 set_target_properties(lect_lib PROPERTIES LINKER_LANGUAGE CXX)
 
 target_include_directories(lect_lib PUBLIC

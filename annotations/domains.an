@@ -1,0 +1,8 @@
+# Application's domains
+
+Since Lect is a fairly simple CLI app with defined inputs and outputs, we can conceptualize each step of the data processing as it's own domain, which are:
+- Configuration $configuration: configuring the program with user-defined options
+- Extraction $extract: extraction of annotations
+- Validation $validation: validating that the extracted annotation net is correct
+- Preprocessing $preprocessing: modifying and transforming the annotations to fit their final form
+- Export: generating the final documentation

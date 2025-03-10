@@ -6,6 +6,7 @@
 #pragma once
 
 #include "tree-sitter-cpp.h"
+#include "tree-sitter-java.h"
 #include "tree_sitter/api.h"
 #include <cstdint>
 #include <functional>
@@ -249,6 +250,21 @@ struct Language {
         return Language("c++", extensions,
                         "((comment) @comment . (comment)* . (_) @object)",
                         tree_sitter_cpp(),
+                        std::make_unique<CSyntaxValidator>());
+    }
+
+    /**
+     * @brief Generates an object suited for Java parsing
+     *
+     * @return Language pack that can be user for Java
+     */
+    //$language-java-src Java language object builder
+    static Language java() {
+        std::vector<std::string> extensions{".java"};
+        return Language("java", extensions,
+                        "((line_comment) @comment . [(line_comment) "
+                        "(block_comment)]* . (_) @object)",
+                        tree_sitter_java(),
                         std::make_unique<CSyntaxValidator>());
     }
 
