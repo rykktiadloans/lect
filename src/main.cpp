@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -29,10 +30,12 @@ int main(int argc, char **argv) {
 
     lect::Annotations annotations;
     try {
-        annotations = lect::AnnotationsBuilder()
-            .extract_text_annotations(settings->text_annotation_path)
-            .extract_code_annotations(settings->code_annotation_path, settings->language)
-            .get_annotations();
+        annotations =
+            lect::AnnotationsBuilder()
+                .extract_text_annotations(settings->text_annotation_path)
+                .extract_code_annotations(settings->code_annotation_path,
+                                          settings->language)
+                .get_annotations();
     } catch (lect::Exception e) {
         if (true) {
             return 1;
@@ -47,7 +50,8 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    nlohmann::json dict = settings->preprocessing_builder.build().preprocess(annotations);
+    nlohmann::json dict =
+        settings->preprocessing_builder.build().preprocess(annotations);
 
     try {
         lect::export_to_dir(settings->output_path, dict);
@@ -56,6 +60,8 @@ int main(int argc, char **argv) {
                   << "\n";
         return 1;
     }
+    std::cout << "Lect successfully generated the documentation at "
+              << std::filesystem::canonical(settings->output_path) << "\n";
 
     return 0;
 }

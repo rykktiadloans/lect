@@ -18,7 +18,6 @@
 #include <memory>
 #include <mutex>
 #include <string>
-#include <thread>
 #include <tree-sitter-cpp.h>
 #include <vector>
 #include <string>
@@ -122,7 +121,6 @@ struct AnnotationsBuilder {
             for (auto const &child : directory_iterator{path}) {
                 futures.push_back(std::async(
                     std::launch::async, [child, &add, &language, this] {
-                        std::cout << std::this_thread::get_id() << "\n";
                         _extract_code_annotations_inner(child, language, add);
                     }));
             }
@@ -255,7 +253,6 @@ struct AnnotationsBuilder {
                  directory_iterator{path}) {
                 futures.push_back(
                     std::async(std::launch::async, [child, &add, this] {
-                        std::cout << std::this_thread::get_id() << "\n";
                         _extract_text_annotations_inner(child, add);
                     }));
             }

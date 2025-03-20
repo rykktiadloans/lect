@@ -39,27 +39,12 @@ lect -t annotations/ -s src/ -o docs/ -l c++
 You can view the program's options using `-h` and `--help` CLI flags. 
 
 ## Supported languages
-- C++: using `c++`
+- C++: using `c++` flag
+- Java: using `java` flag
 
 ## Dependencies used
 - [Tree-sitter](https://github.com/tree-sitter/tree-sitter): used for extracting source code annotations. Can support a wide range of languages, as long as there are parsers for them.
 - [Tree-sitter-cpp](https://github.com/tree-sitter/tree-sitter-cpp): a Tree-sitter parser for C++.
+- [Tree-sitter-java](https://github.com/tree-sitter/tree-sitter-java): a Tree-sitter parser for Java.
 - [Nlohmann's JSON library](https://github.com/nlohmann/json): used for serializing annotations into an easily-readable format.
 - [Vis.js Network](https://github.com/visjs/vis-network): JS library for presenting network graphs. Used to draw the annotation tree in the documentation
-
-## To-do List
-- [ ] Add optional checks
-- [ ] Add Java support
-- [x] Add annotation tree displayer
-- [x] Add annotation inspector
-- [x] Add basic output checking
-- [x] Add -h
-- [x] Add colored output
-- [x] Figure out error checking
-- [x] Add basic command line arguments
-- [x] Add JSON export
-- [x] Add source code annotations
-- [x] Add proper format checking to text annotations 
-
-## Remember
-- [ ] Make sure Doxygen is everywhere

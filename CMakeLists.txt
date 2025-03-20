@@ -1,11 +1,17 @@
 cmake_minimum_required(VERSION 3.30.0)
 
-project(lect LANGUAGES CXX C VERSION 0.3.2)
+project(lect LANGUAGES CXX C VERSION 0.3.3)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(STRICT_COMPILE_COMMANDS -Wpedantic -Wall -Wextra -Wno-sign-conversion -Wno-unused-parameter -g -static)
+set(STRICT_COMPILE_COMMANDS -Wpedantic -Wall -Wextra -Wno-sign-conversion -Wno-unused-parameter -static)
 set(BUILD_SHARED_LIBS OFF)
+
+set(OPTIMIZATION_LEVEL -O1 -g)
+if( CMAKE_BUILD_TYPE STREQUAL Release)
+    set(OPTIMIZATION_LEVEL -O3)
+    message(STATUS ${OPTIMIZATION_LEVEL})
+endif()
 
 include(FetchContent)
 
@@ -30,7 +36,7 @@ add_res_file(vis_js vis-network.min.js)
 add_library(resources STATIC ${RESOURCES})
 target_include_directories(resources PUBLIC ${SRC_DIR}/resread)
 set_target_properties(resources PROPERTIES LINKER_LANGUAGE CXX)
-target_compile_options(resources PRIVATE ${STRICT_COMPILE_COMMANDS} )
+target_compile_options(resources PRIVATE ${STRICT_COMPILE_COMMANDS} ${OPTIMIZATION_LEVEL})
 
 ## Dependencies
 # Tree-sitter
@@ -46,7 +52,7 @@ target_include_directories(tree-sitter
     ${TREE_SITTER_LIB}/include
 )
 
-target_compile_options(tree-sitter PRIVATE -static-libgcc)
+target_compile_options(tree-sitter PRIVATE -static-libgcc ${OPTIMIZATION_LEVEL})
 
 # C++ Grammar
 add_library(tree-sitter-cpp STATIC
@@ -62,7 +68,7 @@ target_include_directories(tree-sitter-cpp
     ${TREE_SITTER_CPP}/bindings/c
 )
 
-target_compile_options(tree-sitter-cpp PRIVATE -static-libgcc)
+target_compile_options(tree-sitter-cpp PRIVATE -static-libgcc ${OPTIMIZATION_LEVEL})
 
 # Java Grammar
 add_library(tree-sitter-java STATIC
@@ -77,7 +83,7 @@ target_include_directories(tree-sitter-java
     ${TREE_SITTER_JAVA}/bindings/c
 )
 
-target_compile_options(tree-sitter-java PRIVATE -static-libgcc)
+target_compile_options(tree-sitter-java PRIVATE -static-libgcc ${OPTIMIZATION_LEVEL})
 
 # JSON
 add_library(nlohmann_json STATIC
@@ -86,7 +92,7 @@ add_library(nlohmann_json STATIC
 target_include_directories(nlohmann_json PUBLIC
     ${JSON_LIB})
 
-target_compile_options(nlohmann_json PRIVATE ${STRICT_COMPILE_COMMANDS})
+target_compile_options(nlohmann_json PRIVATE ${STRICT_COMPILE_COMMANDS} ${OPTIMIZATION_LEVEL})
 
 set_target_properties(nlohmann_json PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -107,10 +113,10 @@ target_include_directories(lect_lib PUBLIC
     ${SRC_DIR}/lect
 )
 
-target_compile_options(lect_lib PRIVATE ${STRICT_COMPILE_COMMANDS} )
+target_compile_options(lect_lib PRIVATE ${STRICT_COMPILE_COMMANDS} ${OPTIMIZATION_LEVEL})
 
 ## Target configuration
 # Final executable
 add_executable(lect ${SRC_DIR}/main.cpp)
 target_link_libraries(lect lect_lib )
-target_compile_options(lect PRIVATE ${STRICT_COMPILE_COMMANDS} )
+target_compile_options(lect PRIVATE ${STRICT_COMPILE_COMMANDS} ${OPTIMIZATION_LEVEL})
