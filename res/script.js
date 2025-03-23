@@ -1,9 +1,9 @@
 "use strict"; // plsssssssxxs
 let direction = annotationsJSON.dir === undefined ? "UD" : annotationsJSON.dir;
 let shake = annotationsJSON.shake === undefined ? "roots" : annotationsJSON.shake;
+let isJetbrains = annotationsJSON.jetbrains === true ? true : false;
 let levelSeparation = 200;
 let nodeSpacing = 130;
-
 
 if(direction === "UD" || direction === "DU") {
     levelSeparation = 120;
@@ -208,7 +208,11 @@ function displayNode(nodeId) {
         content.style.whiteSpace = "nowrap";
         let file = document.createElement("p");
         file.classList.add("file");
-        file.textContent = annotation.file + ":" + annotation.line;
+        file.innerHTML =`<a href="file://${annotation.full_file}" target="_blank">${annotation.file}:${annotation.line}</a>`;
+        if(isJetbrains) {
+            let jbString = `http://localhost:63342/api/file/${annotation.full_file}:${annotation.line + 1}:0`
+            file.innerHTML =`<a href="${jbString}" target="_blank">${annotation.file}:${annotation.line}</a>`;
+        }
         content.before(file);
     }
     else {

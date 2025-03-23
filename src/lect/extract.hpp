@@ -127,7 +127,7 @@ struct AnnotationsBuilder {
             for (auto &fut : futures) {
                 try {
                     fut.get();
-                } catch (Exception e) {
+                } catch (Exception &e) {
                     if (true) {
                         throw e;
                     }
@@ -230,7 +230,7 @@ struct AnnotationsBuilder {
             }
 
             add(id, title, capture_object, relative(path).string(),
-                ts_node_start_point(match.captures[0].node).row);
+                ts_node_start_point(match.captures[1].node).row);
         }
     }
 
@@ -259,7 +259,7 @@ struct AnnotationsBuilder {
             for (auto &fut : futures) {
                 try {
                     fut.get();
-                } catch (Exception e) {
+                } catch (Exception &e) {
                     if (true) {
                         throw e;
                     }

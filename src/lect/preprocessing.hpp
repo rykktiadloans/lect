@@ -3,6 +3,7 @@
 #include "nlohmann/json.hpp"
 #include "structures.hpp"
 #include <cstdint>
+#include <filesystem>
 #include <functional>
 #include <iostream>
 #include <set>
@@ -75,6 +76,15 @@ struct PrepocessingBuilder {
         return *this;
     }
 
+    PrepocessingBuilder &add_jetbrains_flag() {
+        auto prev = _json_preprocessing;
+        _json_preprocessing = [prev](nlohmann::json &dict) {
+            auto new_dict = prev(dict);
+            return _add_jetbrains_flag(new_dict);
+        };
+        return *this;
+    }
+
     PrepocessingBuilder &remove_code_annotations_middle() {
         auto prev = _annotations_preprocessing;
         _annotations_preprocessing = [prev](Annotations &annotations) {
@@ -129,9 +139,13 @@ struct PrepocessingBuilder {
 
         for (const auto &a : annotations.code_annotations) {
             json t = {
-                {"id", a.id},           {"title", a.title},
-                {"content", a.content}, {"file", a.file},
-                {"line", a.line},       {"connected_to", connections.at(a.id)}};
+                {"id", a.id},
+                {"title", a.title},
+                {"content", a.content},
+                {"file", a.file},
+                {"full_file", std::filesystem::canonical(a.file).string()},
+                {"line", a.line},
+                {"connected_to", connections.at(a.id)}};
             dict["code_annotations"].push_back(t);
         }
 
@@ -210,6 +224,11 @@ struct PrepocessingBuilder {
         return dict;
     }
 
+    static nlohmann::json _add_jetbrains_flag(nlohmann::json &dict) {
+        dict["jetbrains"] = true;
+        return dict;
+    }
+
     static void _remove_code_annotations_middle(Annotations &annotations) {
         for (auto &annotation : annotations.code_annotations) {
             uint64_t first_newline = annotation.content.find_first_of("\n");
@@ -224,5 +243,6 @@ struct PrepocessingBuilder {
                     last_newline, annotation.content.size() - last_newline);
         }
     }
+
 };
 } // namespace lect

@@ -29,7 +29,7 @@ void export_to_dir(const std::filesystem::path &path,
     if (!std::filesystem::exists(path)) {
         try {
             std::filesystem::create_directory(path);
-        } catch (std::filesystem::filesystem_error e) {
+        } catch (std::filesystem::filesystem_error &e) {
             throw Exception("File `" + path.string() +
                             "` already exists, but it needs to be a directory");
         }

@@ -37,6 +37,7 @@ Optional arguments:
               code annotations
   -lup <d>    Choose which nodes should be lined up
               (leaves, roots)
+  -jb         Open code links with Jetbrains IDEs
   -h, --help  Help screen
 )del";
 
@@ -161,6 +162,9 @@ struct Settings {
             } else if (arg == "-r") {
                 settings->preprocessing_builder
                     .remove_code_annotations_middle();
+            } else if (arg == "-jb") {
+                settings->preprocessing_builder
+                    .add_jetbrains_flag();
             } else if (arg == "-suf") {
                 if (argc == ptr + 1) {
                     throw Exception("Suffix not supplied after " + color_green +

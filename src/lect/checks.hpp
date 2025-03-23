@@ -164,7 +164,7 @@ struct CycleChecker : public Checker {
         TextAnnotation a;
         try {
             a = text_annotation_map.at(current);
-        } catch (std::out_of_range e) {
+        } catch (std::out_of_range &e) {
             return;
         }
         std::vector<std::string> new_prev(prev);

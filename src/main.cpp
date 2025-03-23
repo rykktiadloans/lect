@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
     std::unique_ptr<lect::Settings> settings;
     try {
         settings = lect::Settings::build_with_args(argc, argv);
-    } catch (lect::Exception e) {
+    } catch (lect::Exception &e) {
         if (std::string(e.what()) == "help") {
             return 0;
         }
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
                 .extract_code_annotations(settings->code_annotation_path,
                                           settings->language)
                 .get_annotations();
-    } catch (lect::Exception e) {
+    } catch (lect::Exception &e) {
         if (true) {
             return 1;
         }
@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 
     try {
         settings->checker->check(annotations);
-    } catch (lect::Exception e) {
+    } catch (lect::Exception &e) {
         std::cout << lect::color_red + "ERROR: " + lect::color_reset + e.what()
                   << "\n";
         return 1;
@@ -55,13 +55,13 @@ int main(int argc, char **argv) {
 
     try {
         lect::export_to_dir(settings->output_path, dict);
-    } catch (lect::Exception e) {
+    } catch (lect::Exception &e) {
         std::cout << lect::color_red + "ERROR: " + lect::color_reset + e.what()
                   << "\n";
         return 1;
     }
     std::cout << "Lect successfully generated the documentation at "
-              << std::filesystem::canonical(settings->output_path) << "\n";
+              << std::filesystem::canonical(settings->output_path/"index.html").string() << "\n";
 
     return 0;
 }
