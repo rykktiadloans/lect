@@ -47,4 +47,5 @@ You can view the program's options using `-h` and `--help` CLI flags.
 - [Tree-sitter-cpp](https://github.com/tree-sitter/tree-sitter-cpp): a Tree-sitter parser for C++.
 - [Tree-sitter-java](https://github.com/tree-sitter/tree-sitter-java): a Tree-sitter parser for Java.
 - [Nlohmann's JSON library](https://github.com/nlohmann/json): used for serializing annotations into an easily-readable format.
+- [GoogleTest](https://github.com/google/googletest): a testing framework
 - [Vis.js Network](https://github.com/visjs/vis-network): JS library for presenting network graphs. Used to draw the annotation tree in the documentation

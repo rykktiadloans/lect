@@ -96,6 +96,15 @@ target_compile_options(nlohmann_json PRIVATE ${STRICT_COMPILE_COMMANDS} ${OPTIMI
 
 set_target_properties(nlohmann_json PROPERTIES LINKER_LANGUAGE CXX)
 
+## GTest 
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
 ## Library configuration
 add_library(lect_lib STATIC
     ${SRC_DIR}/lect/extract.hpp
@@ -120,3 +129,21 @@ target_compile_options(lect_lib PRIVATE ${STRICT_COMPILE_COMMANDS} ${OPTIMIZATIO
 add_executable(lect ${SRC_DIR}/main.cpp)
 target_link_libraries(lect lect_lib )
 target_compile_options(lect PRIVATE ${STRICT_COMPILE_COMMANDS} ${OPTIMIZATION_LEVEL})
+
+# Tests
+
+enable_testing()
+
+add_executable(
+  lect_test
+  ${SRC_DIR}/test/basic_test.cpp
+  ${SRC_DIR}/test/extraction_test.cpp
+)
+target_link_libraries(
+  lect_test
+  lect_lib
+  GTest::gtest_main
+)
+
+include(GoogleTest)
+gtest_discover_tests(lect_test)

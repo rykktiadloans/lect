@@ -11,7 +11,7 @@
 #include "structures.hpp"
 #include "vis_js.hpp"
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
 
     // We'll need this one
     assert(std::string(vis_js).size() == 688913);

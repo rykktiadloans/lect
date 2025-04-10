@@ -63,7 +63,7 @@ struct Settings {
      * @param argv An array of command line arguments
      */
     //$settings-builder-src Settings builder method
-    static std::unique_ptr<Settings> build_with_args(int argc, char **argv) {
+    static std::unique_ptr<Settings> build_with_args(int argc, const char **argv) {
         std::unique_ptr<Settings> settings{new Settings()};
         settings->checker = std::make_unique<IdAllowedSymbolsChecker>();
         settings->checker->add(std::make_unique<DuplicateChecker>());
