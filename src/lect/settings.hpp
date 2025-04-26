@@ -7,6 +7,7 @@
 #pragma once
 
 #include "checks.hpp"
+#include "nlohmann/json.hpp"
 #include "preprocessing.hpp"
 #include "structures.hpp"
 #include <filesystem>
@@ -53,7 +54,7 @@ struct Settings {
     std::filesystem::path output_path;
     Language language{Language::placeholder()};
     std::unique_ptr<Checker> checker;
-    PrepocessingBuilder preprocessing_builder;
+    Preprocessing preprocessing {[](Annotations &p) {return nlohmann::json();}};
 
     /**
      * @brief Uses main() function's argc and argv arguments to construct a
@@ -69,6 +70,7 @@ struct Settings {
         settings->checker->add(std::make_unique<DuplicateChecker>());
         settings->checker->add(std::make_unique<NonexistentChecker>());
         settings->checker->add(std::make_unique<CycleChecker>());
+        PrepocessingBuilder preprocessing_builder;
 
         int ptr = 1;
         bool text_path_set = false;
@@ -157,13 +159,13 @@ struct Settings {
                                     dir + color_reset +
                                     "\nCan be either `RL`, `LR`, `UD`, `DU`");
                 }
-                settings->preprocessing_builder.add_direction(dir);
+                preprocessing_builder.add_direction(dir);
 
             } else if (arg == "-r") {
-                settings->preprocessing_builder
+                preprocessing_builder
                     .remove_code_annotations_middle();
             } else if (arg == "-jb") {
-                settings->preprocessing_builder
+                preprocessing_builder
                     .add_jetbrains_flag();
             } else if (arg == "-suf") {
                 if (argc == ptr + 1) {
@@ -188,7 +190,7 @@ struct Settings {
                                     color_blue + "'" + dir + "'" + color_reset +
                                     ".\nAvailable options: 'leaves', 'roots'");
                 }
-                settings->preprocessing_builder.set_lineup(dir);
+                preprocessing_builder.set_lineup(dir);
 
             } else if (arg == "-h" || arg == "--help") {
                 std::cout << help_string;
@@ -222,6 +224,7 @@ struct Settings {
         if (except != "") {
             throw Exception(except.substr(0, except.size() - 1));
         }
+        settings->preprocessing = preprocessing_builder.build();
         return settings;
     }
 

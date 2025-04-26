@@ -11,10 +11,27 @@
 #include "structures.hpp"
 #include "vis_js.hpp"
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#define VC_EXTRALEAN
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#define DISABLE_NEWLINE_AUTO_RETURN  0x0008
+#include <Windows.h> 
+#endif 
+
 int main(int argc, const char **argv) {
 
     // We'll need this one
     assert(std::string(vis_js).size() == 688913);
+
+#ifdef _WIN32
+    HANDLE handleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD consoleMode;
+    GetConsoleMode( handleOut , &consoleMode);
+    consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    consoleMode |= DISABLE_NEWLINE_AUTO_RETURN;            
+    SetConsoleMode( handleOut , consoleMode );
+#endif
 
     std::unique_ptr<lect::Settings> settings;
     try {
@@ -51,7 +68,7 @@ int main(int argc, const char **argv) {
     }
 
     nlohmann::json dict =
-        settings->preprocessing_builder.build().preprocess(annotations);
+        settings->preprocessing.preprocess(annotations);
 
     try {
         lect::export_to_dir(settings->output_path, dict);
