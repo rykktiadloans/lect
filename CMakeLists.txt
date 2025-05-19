@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.30.0)
 
-project(lect LANGUAGES CXX C VERSION 0.4.1)
+project(lect LANGUAGES CXX C VERSION 0.4.2)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -25,8 +25,9 @@ set(JSON_LIB lib/json)
 set(RESOURCES)
 function(add_res_file STR_NAME FILE_NAME)
     file(READ res/${FILE_NAME} FILE_CONTENT)
-    configure_file(res/filestringtemp.hpp ${CMAKE_CURRENT_SOURCE_DIR}/${SRC_DIR}/resread/${STR_NAME}.hpp)
-    set(RESOURCES ${RESOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/${SRC_DIR}/resread/${STR_NAME}.hpp PARENT_SCOPE)
+    configure_file(res/filestringtemp.hpp ${CMAKE_CURRENT_SOURCE_DIR}/${SRC_DIR}/resread/include/${STR_NAME}.hpp)
+    configure_file(res/filestringtemp.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${SRC_DIR}/resread/${STR_NAME}.cpp)
+    set(RESOURCES ${RESOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/${SRC_DIR}/resread/${STR_NAME}.cpp PARENT_SCOPE)
 endfunction()
 
 add_res_file(index_html index.html)
@@ -34,7 +35,7 @@ add_res_file(script_js script.js)
 add_res_file(vis_js vis-network.min.js)
 
 add_library(resources STATIC ${RESOURCES})
-target_include_directories(resources PUBLIC ${SRC_DIR}/resread)
+target_include_directories(resources PUBLIC ${SRC_DIR}/resread/include)
 set_target_properties(resources PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_options(resources PRIVATE ${STRICT_COMPILE_COMMANDS} ${OPTIMIZATION_LEVEL})
 
@@ -107,19 +108,19 @@ FetchContent_MakeAvailable(googletest)
 
 ## Library configuration
 add_library(lect_lib STATIC
-    ${SRC_DIR}/lect/extract.hpp
-    ${SRC_DIR}/lect/export.hpp
-    ${SRC_DIR}/lect/structures.hpp
-    ${SRC_DIR}/lect/checks.hpp
-    ${SRC_DIR}/lect/settings.hpp
-    ${SRC_DIR}/lect/preprocessing.hpp
+    ${SRC_DIR}/lect/extract.cpp
+    ${SRC_DIR}/lect/export.cpp
+    ${SRC_DIR}/lect/structures.cpp
+    ${SRC_DIR}/lect/checks.cpp
+    ${SRC_DIR}/lect/settings.cpp
+    ${SRC_DIR}/lect/preprocessing.cpp
 )
 
 target_link_libraries(lect_lib PUBLIC tree-sitter tree-sitter-cpp tree-sitter-java nlohmann_json resources)
 set_target_properties(lect_lib PROPERTIES LINKER_LANGUAGE CXX)
 
 target_include_directories(lect_lib PUBLIC
-    ${SRC_DIR}/lect
+    ${SRC_DIR}/lect/include
 )
 
 target_compile_options(lect_lib PRIVATE ${STRICT_COMPILE_COMMANDS} ${OPTIMIZATION_LEVEL})
@@ -138,6 +139,7 @@ add_executable(
   lect_test
   ${SRC_DIR}/test/basic_test.cpp
   ${SRC_DIR}/test/extraction_test.cpp
+  ${SRC_DIR}/test/checking_test.cpp
 )
 target_link_libraries(
   lect_test

@@ -19,42 +19,42 @@ namespace lect {
 /**
  * @brief Reset the color of the standard output
  */
-std::string color_reset = "\x1B[0m";
+extern std::string color_reset;
 
 /**
  * @brief Color the standard output red
  */
-std::string color_red = "\x1B[31m";
+extern std::string color_red; 
 
 /**
  * @brief Color the standard output green
  */
-std::string color_green = "\x1B[32m";
+extern std::string color_green; 
 
 /**
  * @brief Color the standard output yellow
  */
-std::string color_yellow = "\x1B[33m";
+extern std::string color_yellow; 
 
 /**
  * @brief Color the standard output blue
  */
-std::string color_blue = "\x1B[34m";
+extern std::string color_blue; 
 
 /**
  * @brief Color the standard output magenta
  */
-std::string color_magenta = "\x1B[35m";
+extern std::string color_magenta; 
 
 /**
  * @brief Color the standard output cyan
  */
-std::string color_cyan = "\x1B[36m";
+extern std::string color_cyan; 
 
 /**
  * @brief Color the standard output white
  */
-std::string color_white = "\x1B[37m";
+extern std::string color_white; 
 
 /**
  * @class TextAnnotation
@@ -181,28 +181,7 @@ struct CSyntaxValidator : public CaptureValidator {
      * @param string Comment to validate
      * @return true if it is correct, false otherwise
      */
-    virtual bool validate_comment(std::string string) override {
-        uint64_t begin = string.find_first_not_of("\n ");
-        if (begin == std::string::npos) {
-            return false;
-        }
-
-        std::string comment_fragment = string.substr(begin, 2);
-        if (comment_fragment != "//") {
-            return false;
-        }
-
-        uint64_t ptr = begin + 2;
-        while (string.at(ptr) == ' ' || string.at(ptr) == '\n') {
-            ptr++;
-        }
-
-        if (string.at(ptr) != '$') {
-            return false;
-        }
-
-        return true;
-    }
+    virtual bool validate_comment(std::string string) override; 
 
     /**
      * @brief Make sure that an object isn't a comment
@@ -210,19 +189,7 @@ struct CSyntaxValidator : public CaptureValidator {
      * @param string String to validate
      * @return true if it is correct, false otherwise
      */
-    virtual bool validate_object(std::string string) override {
-        uint64_t begin = string.find_first_not_of("\n ");
-        if (begin == std::string::npos) {
-            return false;
-        }
-
-        std::string comment_fragment = string.substr(begin, 2);
-        if (comment_fragment == "//" || comment_fragment == "/*") {
-            return false;
-        }
-
-        return true;
-    }
+    virtual bool validate_object(std::string string) override; 
 };
 
 /**
@@ -245,13 +212,7 @@ struct Language {
      * @return Language pack that can be user for C++
      */
     //$language-cpp-src C++ language object builder
-    static Language cpp() {
-        std::vector<std::string> extensions{".c", ".cpp", ".h", ".hpp"};
-        return Language("c++", extensions,
-                        "((comment) @comment . (comment)* . (_) @object)",
-                        tree_sitter_cpp(),
-                        std::make_unique<CSyntaxValidator>());
-    }
+    static Language cpp(); 
 
     /**
      * @brief Generates an object suited for Java parsing
@@ -259,14 +220,7 @@ struct Language {
      * @return Language pack that can be user for Java
      */
     //$language-java-src Java language object builder
-    static Language java() {
-        std::vector<std::string> extensions{".java"};
-        return Language("java", extensions,
-                        "((line_comment) @comment . [(line_comment) "
-                        "(block_comment)]* . (_) @object)",
-                        tree_sitter_java(),
-                        std::make_unique<CSyntaxValidator>());
-    }
+    static Language java(); 
 
     /**
      * @brief Get a placeholder language object
@@ -274,9 +228,7 @@ struct Language {
      * @return Placeholder
      */
     //$language-placeholder-src Language placeholder
-    static Language placeholder() {
-        return Language("", std::vector<std::string>(), "", nullptr, nullptr);
-    }
+    static Language placeholder(); 
 
   private:
     /**

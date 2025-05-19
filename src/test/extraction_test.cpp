@@ -1,7 +1,7 @@
-
+#pragma once
+#include "structures.hpp"
 #include "extract.hpp"
 #include "settings.hpp"
-#include "structures.hpp"
 #include <gtest/gtest.h>
 
 class ExtractionTest : public testing::Test {

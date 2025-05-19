@@ -77,6 +77,7 @@ int main(int argc, const char **argv) {
                   << "\n";
         return 1;
     }
+
     std::cout << "Lect successfully generated the documentation at "
               << std::filesystem::canonical(settings->output_path/"index.html").string() << "\n";
 
