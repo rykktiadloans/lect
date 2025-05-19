@@ -22,7 +22,7 @@
 int main(int argc, const char **argv) {
 
     // We'll need this one
-    assert(std::string(vis_js).size() == 688913);
+    assert(std::string(vis_js).size() == 475182);
 
 #ifdef _WIN32
     HANDLE handleOut = GetStdHandle(STD_OUTPUT_HANDLE);

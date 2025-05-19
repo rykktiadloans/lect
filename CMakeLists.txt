@@ -20,22 +20,16 @@ set(TREE_SITTER_LIB lib/tree-sitter-0.24.7/lib)
 set(TREE_SITTER_CPP lib/tree-sitter-cpp)
 set(TREE_SITTER_JAVA lib/tree-sitter-java)
 set(JSON_LIB lib/json)
+set(RES_DIR src/resread)
 
 ## Comptime file reads
-set(RESOURCES)
-function(add_res_file STR_NAME FILE_NAME)
-    file(READ res/${FILE_NAME} FILE_CONTENT)
-    configure_file(res/filestringtemp.hpp ${CMAKE_CURRENT_SOURCE_DIR}/${SRC_DIR}/resread/include/${STR_NAME}.hpp)
-    configure_file(res/filestringtemp.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${SRC_DIR}/resread/${STR_NAME}.cpp)
-    set(RESOURCES ${RESOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/${SRC_DIR}/resread/${STR_NAME}.cpp PARENT_SCOPE)
-endfunction()
 
-add_res_file(index_html index.html)
-add_res_file(script_js script.js)
-add_res_file(vis_js vis-network.min.js)
-
-add_library(resources STATIC ${RESOURCES})
-target_include_directories(resources PUBLIC ${SRC_DIR}/resread/include)
+add_library(resources STATIC 
+    ${RES_DIR}/index_html.cpp
+    ${RES_DIR}/script_js.cpp
+    ${RES_DIR}/vis_js.cpp
+)
+target_include_directories(resources PUBLIC ${RES_DIR}/include ${RES_DIR}/xxd)
 set_target_properties(resources PROPERTIES LINKER_LANGUAGE CXX)
 target_compile_options(resources PRIVATE ${STRICT_COMPILE_COMMANDS} ${OPTIMIZATION_LEVEL})
 

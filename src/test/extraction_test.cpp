@@ -1,4 +1,3 @@
-#pragma once
 #include "structures.hpp"
 #include "extract.hpp"
 #include "settings.hpp"
